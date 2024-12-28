@@ -4,7 +4,8 @@ import { DateTime } from "luxon"
 
 const router = Router()
 
-// GET Currency price at a specific time
+// Currency price at a specific time
+// GET /api/currency/USD?at=20211010
 router.get(
   "/:id",
   async (

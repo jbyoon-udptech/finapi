@@ -4,6 +4,7 @@ import axios from "axios"
 const router = Router()
 
 // GET Crypto price at a specific time
+// GET /api/cryto/BTC?at=20211010
 router.get(
   "/:id",
   async (
