@@ -2,22 +2,32 @@ import { Router, Request, Response } from "express"
 import axios from "axios"
 
 const router = Router()
+/**
+ * get stock data from the API. e.g. getStockData("ETN", "20211010")
+ * @param ticker
+ * @param date
+ * @returns value of the stock at the specific date. e.g. {value:100,currency:"USD"}
+ */
+export const getStockData = async (ticker: string, date: string) => {
+  const response = await axios.get(`https://cryptoprices.cc/${ticker}/`)
+  // console.info("get crypto rs:", response)
+  const data = response.data
+  return { value: data, currency: "USD" }
+}
 
 // GET stock price at the specific time
 // GET /api/stock/ETN?at=20211010
 router.get(
   "/:id",
   async (
-    req: Request<{ id: string }, {}, {}, { at: string }>,
+    req: Request<{ id: string }, {}, {}, { date: string }>,
     res: Response
   ) => {
-    const stockId = req.params.id
-    const { at } = req.query
+    const ticker = req.params.id
+    const { date } = req.query
 
     try {
-      const response = await axios.get(`https://cryptoprices.cc/${stockId}/`)
-      // console.info("get crypto rs:", response)
-      const data = response.data
+      const data = await getStockData(ticker, date)
       res.json({ success: true, data })
     } catch (error) {
       console.error("Error fetching posts:", error)
@@ -31,21 +41,6 @@ router.get(
   }
 )
 
-router.get("/xx/:asset/:date", async (req: Request, res: Response) => {
-  const { date, asset } = req.params
-
-  try {
-    // 예시: 외부 API에서 주식 데이터를 가져오는 비동기 작업
-    const response = await axios.get(
-      `https://api.example.com/stocks/${asset}/${date}`
-    )
-    const data = response.data
-
-    res.json({ date, asset, value: data })
-  } catch (error) {
-    console.error("Error fetching stocks data:", error)
-    res.status(500).json({ message: "Failed to fetch stocks data" })
-  }
-})
+exports.getData = getStockData
 
 export default router

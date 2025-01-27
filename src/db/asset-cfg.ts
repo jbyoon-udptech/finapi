@@ -1,4 +1,3 @@
-import { getFData } from "../api/fapi"
 import { IAsset, Asset } from "./asset.model"
 
 export const saveAsset = async (asset: IAsset) => {
@@ -7,12 +6,14 @@ export const saveAsset = async (asset: IAsset) => {
 }
 
 export const loadAsset = async (
-  type: string,
-  ticker: string,
+  assetName: string,
   date: string
-): Promise<{ value: string; unit: string } | null> => {
-  const fdata = await getFData(type, ticker, date)
-  return { value: fdata.value, unit: fdata.currency }
+): Promise<IAsset | null> => {
+  const response = await axios.get(
+    `https://api.example.com/asset/${asset}?date=${
+      currentDate.toISOString().split("T")[0]
+    }`
+  )
 }
 
 /**
@@ -32,6 +33,7 @@ export const getAsset = async (
   return data.toObject() as IAsset
 }
 
+
 /**
  *  IAsset collection's  configuration
  */
@@ -44,24 +46,5 @@ class AssetCfg {
     this.name = name
     this.type = type
     this.ticker = ticker
-  }
-
-  async get(date: string): Promise<IAsset | null> {
-    let value = await getAsset(this.name, date)
-    if (!value) {
-      const data = await loadAsset(this.name, this.type, date)
-      if (data) {
-        value = {
-          name: this.name,
-          type: this.type,
-          ticker: this.ticker,
-          date,
-          value: parseFloat(data.value),
-          unit: data.unit,
-        }
-        await saveAsset(value)
-      }
-    }
-    return value
   }
 }
