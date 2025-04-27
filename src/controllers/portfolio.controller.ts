@@ -1,6 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import portfolioService from '../services/portfolio.service';
 
+const getPortfolioList = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const list = await portfolioService.getPortfolioList();
+    res.status(200).json(list);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const createPortfolio = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const portfolio = await portfolioService.createPortfolio(req.body.name);
@@ -41,6 +50,7 @@ const getPortfolioSnapshots = async (req: Request, res: Response, next: NextFunc
 };
 
 export default {
+  getPortfolioList,
   createPortfolio,
   addAssetToPortfolio,
   getPortfolioSnapshotByDate,

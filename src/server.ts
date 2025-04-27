@@ -1,20 +1,26 @@
-import dotenv from 'dotenv';
-import app from './app';
-import connectDB from './utils/database';
-import setupPortfolioSnapshotCron from './cron/portfolio-snapshot.cron';
+import dotenv from "dotenv"
+import app from "./app"
+import connectDB from "./utils/database"
+import setupPortfolioSnapshotCron from "./cron/portfolio-snapshot.cron"
 
-dotenv.config();
+dotenv.config()
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000
 
 const startServer = async () => {
-  await connectDB();
+  await connectDB()
 
   app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
+    console.log(`Server is running on http://localhost:${PORT}`)
+  })
 
-  setupPortfolioSnapshotCron();
-};
+  if (!process.env.LOCAL) {
+    setupPortfolioSnapshotCron()
+  } else {
+    console.log("cron is not started in local mode")
+  }
+}
 
-startServer();
+if (require.main === module) {
+  startServer()
+}

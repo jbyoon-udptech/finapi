@@ -1,37 +1,42 @@
-import { DateTime } from 'luxon';
-import { fetchAndCache, EFResponseBase } from './external-data.utils';
-import { formatDate } from '../../utils/timezone';
+import { DateTime } from "luxon"
+import { fetchAndCache, EFResponseBase } from "./external-data.utils"
+import { formatDate } from "../../utils/timezone"
 
 interface UpbitResponse {
-  trade_date: string;
-  trade_time_kst: string;
-  trade_price: number;
+  time: number
+  close: number
 }
 
 interface EFResponse extends EFResponseBase {}
 
-const fetchUpbitData = (ticker: string, date: string): Promise<EFResponse> => {
-  const cacheKey = `ef:upbit:${ticker}:${date.replace(/-/g, '')}`; // Upbit API는 날짜 형식이 다를 수 있음
-  const url = `https://api.upbit.com/v1/ticker?markets=${ticker}`; // 실제 API 엔드포인트
+// https://min-api.cryptocompare.com/data/v2/histoday?fsym=BTC&tsym=USD&toTs=1745280000
+export const fetchUpbitData = (ticker: string, date: string): Promise<EFResponse> => {
+  const cacheKey = `ef:upbit:${ticker}:${date}`
+  const toTs = new Date(`${date}T00:00+0900`).getTime() / 1000
+  const url = `https://min-api.cryptocompare.com/data/v2/histoday?fsym=${ticker}&tsym=USD&toTs=${toTs}`
 
-  const parser = (response: { data: UpbitResponse[] }, category: string, t: string, d: string): EFResponse | undefined => {
-    if (response.data && response.data.length > 0) {
-      const item = response.data[0];
-      const tradeDateTime = DateTime.fromISO(item.trade_date + 'T' + item.trade_time_kst);
-      const formattedDate = formatDate(tradeDateTime.toJSDate());
+  const parser = (
+    res: { data: UpbitResponse[] },
+    category: string, // "upbit"
+    ticker: string, // ticker "KRWBTC"
+    _d: string // date "2023-10-01"
+  ): EFResponse | undefined => {
+    if (res.data?.length > 0) {
+      const lastitem = res.data[res.data.length - 1]
+      const tradeDateTime = DateTime.fromMillis(lastitem.time * 1000)
       return {
         category,
-        ticker: t,
-        date: formattedDate,
-        value: item.trade_price,
-        unit: 'KRW',
-        timestamp: tradeDateTime.toISO() || "",
-      };
+        ticker,
+        date,
+        value: lastitem.close,
+        unit: "KRW",
+        timestamp: tradeDateTime?.toISO() || "",
+      }
     }
-    return undefined;
-  };
+    return undefined
+  }
 
-  return fetchAndCache<UpbitResponse[], EFResponse>(cacheKey, url, parser);
-};
+  return fetchAndCache<UpbitResponse[], EFResponse>(cacheKey, url, parser)
+}
 
 export default fetchUpbitData;
