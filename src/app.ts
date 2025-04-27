@@ -1,34 +1,23 @@
-import express, { Request, Response } from "express"
-import cron from "node-cron"
-import dotenv from "dotenv"
-import mongoose from "mongoose"
+import express, { Application } from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import assetRouter from './routes/asset.route';
+import efRouter from './routes/ef.route';
+import portfolioRouter from './routes/portfolio.route';
+import { errorHandler } from './utils/error-handler';
 
-import router from "./api/routes"
-import { updatePortfolioAll } from "./scheduler"
-import { DateTime } from "luxon"
+const app: Application = express();
 
-mongoose.connect("mongodb://localhost/finapi")
+// 미들웨어
+app.use(cors());
+app.use(bodyParser.json());
 
-// configures dotenv to work in your application
-dotenv.config()
-const app = express()
-//app.use(cors(corsOptions));
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+// 라우터
+app.use('/ef', efRouter);
+app.use('/assets', assetRouter);
+app.use('/portfolios', portfolioRouter);
 
-const PORT = process.env.PORT || 3000
+// 에러 핸들러
+app.use(errorHandler);
 
-app.use("/api", router)
-
-app
-  .listen(PORT, () => {
-    console.log(`Server running at PORT:${PORT} at`, new Date().toISOString())
-  })
-  .on("error", (error) => {
-    throw new Error(error.message)
-  })
-
-// Cron Handler
-cron.schedule("0 0 * * *", async () => {
-  await updatePortfolioAll(DateTime.now())
-})
+export default app;
