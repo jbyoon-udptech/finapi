@@ -1,67 +1,123 @@
-import { getFData } from "../api/fapi"
-import { IAsset, Asset } from "./asset.model"
+import { queryFData } from "../api/fapi"
+import { IAssetCfg, AssetCfg, IAssetData, AssetData } from "./asset.model"
 
-export const saveAsset = async (asset: IAsset) => {
-  const nAsset = new Asset(asset)
-  await nAsset.save()
-}
-
-export const loadAsset = async (
-  type: string,
-  ticker: string,
-  date: string
-): Promise<{ value: string; unit: string } | null> => {
-  const fdata = await getFData(type, ticker, date)
-  return { value: fdata.value, unit: fdata.currency }
-}
-
-/**
- * Load asset from the database
- * @param assetName
- * @param date
- * @returns
- */
-export const getAsset = async (
-  assetName: string,
-  date: string
-): Promise<IAsset | null> => {
-  const data = await Asset.findOne({ date, name: assetName }).exec()
-  if (!data) {
+export const loadAssetCfg = async (name: string): Promise<IAssetCfg | null> => {
+  const doc = await AssetCfg.findOne({ name }).exec()
+  if (!doc) {
     return null
   }
-  return data.toObject() as IAsset
+  return doc.toObject() as IAssetCfg
+}
+
+export const changeNameAssetCfg = async (asset: IAssetCfg) => {
+  await AssetCfg.updateOne(
+    { atype: asset.atype, ticker: asset.ticker },
+    { $set: { name: asset.name } }
+  )
+}
+
+export const saveAssetCfg = async (asset: IAssetCfg) => {
+  const doc = new AssetCfg(asset)
+  await doc.save()
+}
+
+export const loadAssetData = async (
+  atype: string,
+  ticker: string,
+  date: string
+): Promise<IAssetData | null> => {
+  const doc = await AssetData.findOne({ atype, ticker, date }).exec()
+  if (!doc) {
+    return null
+  }
+  return doc.toObject() as IAssetData
+}
+
+// save asset to the database
+export const saveAssetData = async (asset: IAssetData) => {
+  await AssetData.updateOne(
+    { atype: asset.atype, ticker: asset.ticker, date: asset.date },
+    { $set: asset },
+    { upsert: true }
+  )
+}
+
+// query asset from the FAPI
+export const queryAssetData = async (
+  name: string,
+  atype: string,
+  ticker: string,
+  date: string
+): Promise<IAssetData | null> => {
+  const fdata = await queryFData(atype, ticker, date)
+  if (!fdata) {
+    return null
+  }
+  return {
+    name,
+    atype,
+    ticker,
+    date,
+    value: parseFloat(fdata.value),
+    unit: fdata.currency,
+  }
 }
 
 /**
  *  IAsset collection's  configuration
+ * @param name string name of the asset. e.g. "TSLA"
+ * @param atype string category of the asset. e.g. "stock", "crypto"
+ * @param ticker string ticker of the asset. e.g. "TSLA", "BTC"
  */
-class AssetCfg {
+class Asset {
   name: string
-  type: string
+  atype: string
   ticker: string
+  config: IAssetCfg | null
 
-  constructor(name: string, type: string, ticker: string) {
+  constructor(name: string, atype: string, ticker: string) {
     this.name = name
-    this.type = type
+    this.atype = atype
     this.ticker = ticker
+    this.config = null
   }
 
-  async get(date: string): Promise<IAsset | null> {
-    let value = await getAsset(this.name, date)
-    if (!value) {
-      const data = await loadAsset(this.name, this.type, date)
+  static async listCfg(): Promise<IAssetCfg[]> {
+    return (await AssetCfg.find({})
+      .sort({ atype: 1, name: 1 })
+      .exec()) as IAssetCfg[]
+  }
+
+  static async saveCfg(cfg: IAssetCfg): Promise<IAssetCfg | null> {
+    try {
+      const doc = new AssetCfg(cfg)
+      await doc.save()
+      return doc.toObject() as IAssetCfg
+    } catch (err) {
+      console.error(`saveCfg error:`, err)
+      return null
+    }
+  }
+
+  async loadCfg(): Promise<IAssetCfg | null> {
+    if (!this.config) {
+      this.config = await loadAssetCfg(this.name)
+    }
+    if (this.config) {
+      this.ticker = this.config.ticker
+      this.atype = this.config.atype
+    }
+    return this.config
+  }
+
+  async loadData(date: string): Promise<IAssetData | null> {
+    let data = await loadAssetData(this.atype, this.ticker, date)
+    if (!data) {
+      data = await queryAssetData(this.name, this.atype, this.ticker, date)
       if (data) {
-        value = {
-          name: this.name,
-          type: this.type,
-          ticker: this.ticker,
-          date,
-          value: parseFloat(data.value),
-          unit: data.unit,
-        }
-        await saveAsset(value)
+        await saveAssetData(data)
       }
     }
-    return value
+    return data
   }
 }

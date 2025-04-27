@@ -1,10 +1,10 @@
 import { getCryptoData } from "./crypto"
 import { getStockData } from "./stock"
 
-export const getFData = async (type: string, ticker: string, date: string) => {
-  if (type === "crypto") {
+export const queryFData = async (atype: string, ticker: string, date: string) => {
+  if (atype === "crypto") {
     return await getCryptoData(ticker, date)
-  } else if (type === "stock") {
+  } else if (atype === "stock") {
     return await getStockData(ticker, date)
   } else {
     throw { code: "Invalid Type" }

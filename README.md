@@ -42,3 +42,4 @@ finance api for asset & Portfolio
 ## Test
 
     npm test
+    npx mocha --require ts-node/register --recursive "test/**/*.ts"

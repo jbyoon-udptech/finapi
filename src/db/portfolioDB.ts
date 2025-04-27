@@ -2,31 +2,111 @@ import { DateTime } from "luxon"
 import {
   IPortfolioCfg,
   PortfolioCfg,
-  IPortfolio,
-  Portfolio,
+  IPortfolioData,
+  PortfolioData,
 } from "./portfolio.model"
 
-export const savePortfoliio = async (
+export const getPortfolioCfg = async (
+  name: string,
+): Promise<IPortfolioCfg | null> => {
+  const doc = await PortfolioCfg.findOne({ name })
+  if (!doc) {
+    return null
+  }
+  return doc.toObject() as IPortfolioCfg
+}
+
+export const savePortfoliioCfg = async (
+  name: String,
+  assets: string[]
+) => {
+  await PortfolioCfg.updateOne(
+    { name },
+    { $set: { name, assets } },
+    { upsert: true }
+  )
+}
+
+export const loadPortfolioData = async (
+  name: string,
+  date: string
+): Promise<IPortfolioData | null> => {
+  const doc = await PortfolioData.findOne({ name, date })
+  if (!doc) {
+    return null
+  }
+  return doc.toObject() as IPortfolioData
+}
+
+export const savePortfoliioData = async (
   name: String,
   date: String,
   values: Map<string, number>
 ) => {
-  await Portfolio.updateOne(
+  await PortfolioData.updateOne(
     { name, date },
     { $set: { name, date, values } },
     { upsert: true }
   )
 }
 
-export const getPortfolio = async (
-  name: string,
-  date: string
-): Promise<IPortfolio | null> => {
-  const data = await Portfolio.findOne({ date, name })
-  if (!data) {
-    return null
+class Portfolio {
+  name: string
+  assets: string[]
+  portfolioCfg: IPortfolioCfg | null
+
+  constructor(name: string) {
+    this.name = name
+    this.assets = []
+    this.portfolioCfg = null
   }
-  return data.toObject() as IPortfolio
+
+  async loadCfg(): Promise<IPortfolioCfg | null> {
+    if (!this.portfolioCfg) {
+      this.portfolioCfg = await getPortfolioCfg(this.name)
+    }
+    if (this.portfolioCfg) {
+      this.assets = this.portfolioCfg.assets
+      // load assets from the database
+      for (const asset of this.assets) {
+        const data = await loadPortfolioData(this.name, asset)
+        if (data) {
+          console.log(`loadPortfolioData[${this.name}, ${asset}]`, data)
+        } else {
+          console.error(`loadPortfolioData[${this.name}, ${asset}] failed`)
+        }
+      }
+    }
+    return this.portfolioCfg
+  }
+
+  async createCfg(name:string, assets: string[]): Promise<IPortfolioCfg | null> {
+    this.name = name
+    this.assets = assets
+    await savePortfoliioCfg(this.name, assets)
+    this.portfolioCfg = await getPortfolioCfg(this.name)
+    return this.portfolioCfg
+  }
+
+
+  async updateData(date: DateTime) {
+    const strDate = date.toFormat("yyyy-MM-dd")
+    try {
+      // load asset from API with portfolio.assets and date
+      const values: Map<string, number> = new Map()
+      for (const asset of this.assets) {
+        const data = await loadAsset(asset, strDate)
+        values.set(asset, data)
+      }
+      await savePortfoliio(portfolioCfg.name, strDate, values)
+      console.info(`updatePortfolioSingle[${portfolioCfg.name}, ${strDate}] done`)
+    } catch (error) {
+      console.error(
+        `Error in updatePortfolioSingle[${portfolioCfg.name}, ${strDate}]`,
+        error
+      )
+    }
+  }
 }
 
 const updatePortfolioSingle = async (
