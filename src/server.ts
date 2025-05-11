@@ -11,13 +11,13 @@ const startServer = async () => {
   await connectDB()
 
   app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`)
+    console.info(`Server is running on http://localhost:${PORT}`)
   })
 
   if (!process.env.LOCAL) {
     setupPortfolioSnapshotCron()
   } else {
-    console.log("cron is not started in local mode")
+    console.info("cron is not started in local mode")
   }
 }
 

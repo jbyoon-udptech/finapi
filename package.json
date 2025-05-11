@@ -9,10 +9,9 @@
     "start": "npx tsc && node dist/server.js",
     "lint": "eslint . --ext .ts",
     "build": "npx tsc",
-    "xtest": "mocha --require ts-node/register --recursive",
-    "test": "mocha --require ts-node/register --recursive 'test/**/*.test.ts'",
-    "test:watch": "mocha --watch --require ts-node/register --recursive 'test/**/*.test.ts'",
-    "test:coverage": "nyc mocha --require ts-node/register --recursive 'test/**/*.test.ts'"
+    "test": "mocha --require ts-node/register --recursive 'src/**/*.test.ts' --exit",
+    "test:watch": "mocha --watch --require ts-node/register --recursive 'src/**/*.test.ts'",
+    "test:coverage": "nyc mocha --require ts-node/register --recursive 'src/**/*.test.ts'"
   },
   "keywords": [],
   "dependencies": {
@@ -29,7 +28,7 @@
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",
-    "@types/chai": "^5.0.1",
+    "@types/chai": "^5.2.2",
     "@types/cors": "^2.8.17",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.1",
@@ -39,9 +38,11 @@
     "@types/node": "^22.15.2",
     "@types/node-cron": "^3.0.11",
     "@types/redis": "^4.0.10",
+    "@types/sinon": "^17.0.4",
     "chai": "^5.2.0",
-    "mocha": "^11.1.0",
+    "mocha": "^11.2.2",
     "nodemon": "^3.1.10",
+    "sinon": "^20.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

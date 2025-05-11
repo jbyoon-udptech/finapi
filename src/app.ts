@@ -2,7 +2,7 @@ import express, { Application } from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import assetRouter from './routes/asset.route';
-import efRouter from './routes/ef.route';
+import extapiRouter from './routes/extapi.route';
 import portfolioRouter from './routes/portfolio.route';
 import { errorHandler } from './utils/error-handler';
 
@@ -13,7 +13,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // 라우터
-app.use('/ef', efRouter);
+app.use('/extapi', extapiRouter);
 app.use('/assets', assetRouter);
 app.use('/portfolios', portfolioRouter);
 

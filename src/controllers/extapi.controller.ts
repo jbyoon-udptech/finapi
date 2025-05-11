@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express"
-import { fetchExternalData } from "../services/external-data"
+import { fetchExternalData } from "../services/external-api"
 
 export const getExternalData = async (
   req: Request,

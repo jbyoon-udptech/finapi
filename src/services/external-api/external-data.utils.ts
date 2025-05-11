@@ -15,9 +15,10 @@ async function fetchAndCache<T, R extends EFResponseBase>(
   cacheKey: string,
   url: string,
   parser: (response: AxiosResponse<T>, category: string, ticker: string, date: string) => R | undefined,
+  noCache: boolean = false,
   cachingTime: number = 300 // Default 5 minutes
 ): Promise<R> {
-  const cachedData = await getCache(cacheKey);
+  const cachedData = noCache ? await getCache(cacheKey) : null;
 
   if (cachedData) {
     return JSON.parse(cachedData) as R;
@@ -25,8 +26,7 @@ async function fetchAndCache<T, R extends EFResponseBase>(
 
   try {
     const response = await axios.get<T>(url);
-    const parsedData = parser(response, cacheKey.split(':')[1], cacheKey.split(':')[2], cacheKey.split(':')[3]); // Extract category, ticker, date from cacheKey
-
+    const parsedData = parser(response, cacheKey.split(':')[1], cacheKey.split(':')[2], cacheKey.split(':')[3]);
     if (!parsedData) {
       throw new APIError('Failed to parse external data', 500);
     }

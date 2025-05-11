@@ -1,5 +1,5 @@
 import AssetModel, { AssetDocument } from '../models/asset.model';
-import efService from './external-data';
+import efService from './external-api';
 import { formatDate } from '../utils/timezone';
 import { APIError } from '../utils/error-handler';
 import { getCache, setCache } from '../utils/cache';

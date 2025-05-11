@@ -4,13 +4,12 @@ Purpose: a financial api for monitoring current and historical changes in assets
 
 ## 구조
 
-  [RFC|RFC.md]
+  [RFC](RFC.md)
 
-## 구현
+## 진행상황
 
-- 언어 : typescript
-- web framework : express.js
-- db : mongoDB
+- 2025-05-11
+  - done: currency unit test
 
 ## build & run
 

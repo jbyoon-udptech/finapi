@@ -168,7 +168,7 @@ const createDailyPortfolioSnapshot = async (
     date: new Date(date),
   })
   if (existingSnapshot) {
-    console.log(
+    console.info(
       `Snapshot already exists for portfolio ${portfolioId} on ${date}`
     )
     return
