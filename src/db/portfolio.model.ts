@@ -1,37 +1,71 @@
 import mongoose, { Document, Model } from "mongoose"
 
-interface IPortfolioCfg extends Document {
+interface IPortfolioList extends Document {
   name: string // name of the portfolio. e.g. "JB's Portfolio"
-  assets: string[] // list of assets in the portfolio. e.g. ["BTC", "ETH"]
+  currency: string // currency of the portfolio. e.g. "KRW", "USD", "EUR"
 }
 
-const PortfolioCfgSchema = new mongoose.Schema<IPortfolioCfg>({
-  name: { type: String, required: true },
-  assets: { type: [String], required: true },
+const PortfolioListSchema = new mongoose.Schema<IPortfolioList>({
+  name: { type: String, required: true, unique: true },
+  currency: { type: String, required: true, default: "KRW" },
 })
 
-const PortfolioCfg: Model<IPortfolioCfg> = mongoose.model(
-  "portfolioCfg",
-  PortfolioCfgSchema
+// PortfloioList는 포트폴리오의 목록을 관리하는 모델이다.
+const PortfolioList: Model<IPortfolioList> = mongoose.model(
+  "portfolioList",
+  PortfolioListSchema
 )
 
-interface IPortfolio extends Document {
-  name: string // name of the portfolio. e.g. "JB's Portfolio"
-  date: string // date of the portfolio. e.g. "2021-01-01"
-  values: Map<string, number> // values of the assets in the portfolio. e.g. { "BTC": 10000, "ETH": 2000 }
+/*
+  asset history of the portfolio.
+  e.g.
+  {
+    name: "JB's Portfolio",
+    date: "2025-01-01",
+    assets: [
+      { name: "BTC", count: 10 },
+      { name: "ETH", count: 15 },
+      { name: "한화오션", count: 200 },
+    ],
+  },
+  {
+    name: "JB's Portfolio",
+    date: "2025-01-08",
+    assets: [
+      { name: "BTC", count: 10 },
+      { name: "ETH", count: 15 },
+      { name: "한화오션", count: 300 },
+    ]
+  }
+*/
+interface IPortfolioHistory extends Document {
+  name: string // name of the portfolioList. e.g. "JB's Portfolio"
+  date: string // target date. e.g. "2021-01-01"
+  assets: [
+    {
+      name: string // name of the asset. e.g. "BTC", "ETH", "KOSPI-한화오션"
+      count: number // number of the asset. e.g. 10, 15, 20
+    }
+  ]
 }
 
-const PortfolioSchema = new mongoose.Schema<IPortfolio>({
+const PortfolioHistorySchema = new mongoose.Schema<IPortfolioHistory>({
   name: { type: String, required: true },
   date: { type: String, required: true },
-  values: { type: Map, of: Number, required: true },
+  assets: [
+    {
+      name: { type: String, required: true },
+      count: { type: Number, required: true },
+    },
+  ],
 })
 
-PortfolioSchema.index({ name: 1, date: 1 });
+PortfolioHistorySchema.index({ name: 1, date: 1 }, { unique: true })
 
-const Portfolio: Model<IPortfolio> = mongoose.model(
+// 일별로 potfolio의 자산을 저장하고 있는 모델이다.
+const PortfolioHistory: Model<IPortfolioHistory> = mongoose.model(
   "portfolio",
-  PortfolioSchema
+  PortfolioHistorySchema
 )
 
-export { IPortfolioCfg, PortfolioCfg, IPortfolio, Portfolio }
+export { IPortfolioList, PortfolioList, IPortfolioHistory, PortfolioHistory }

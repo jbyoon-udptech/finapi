@@ -1,51 +1,74 @@
 import { DateTime } from "luxon"
 import {
-  IPortfolioCfg,
-  PortfolioCfg,
-  IPortfolio,
-  Portfolio,
+  IPortfolioList,
+  PortfolioList,
+  IPortfolioHistory,
+  PortfolioHistory,
 } from "./portfolio.model"
 
-export const savePortfoliio = async (
-  name: String,
-  date: String,
-  values: Map<string, number>
-) => {
-  await Portfolio.updateOne(
-    { name, date },
-    { $set: { name, date, values } },
+export const savePortfoliio = async (pf: IPortfolioHistory) => {
+  await PortfolioHistory.updateOne(
+    { name: pf.name, date: pf.date },
+    { $set: pf },
     { upsert: true }
   )
 }
 
-export const getPortfolio = async (
+export const loadPortfolio = async (
   name: string,
-  date: string
-): Promise<IPortfolio | null> => {
-  const data = await Portfolio.findOne({ date, name })
+  date: string,
+  condition: string = "eq"
+): Promise<IPortfolioHistory | null> => {
+  const qry: { name: string; date: string | { $lte?: string; $gte?: string } } =
+    { name, date }
+  if (condition == "lte") {
+    qry.date = { $lte: date }
+  } else if (condition == "gte") {
+    qry.date = { $gte: date }
+  } else {
+    qry.date = date
+  }
+  const data = await PortfolioHistory.findOne(qry)
   if (!data) {
     return null
   }
-  return data.toObject() as IPortfolio
+  return data.toObject() as IPortfolioHistory
 }
 
 const updatePortfolioSingle = async (
-  portfolioCfg: IPortfolioCfg,
-  date: DateTime
+  portfolio: IPortfolioList,
+  date: DateTime,
+  force: boolean = false
 ) => {
+  const pfName = portfolio.name
   const strDate = date.toFormat("yyyy-MM-dd")
+  let pf: IPortfolioHistory | null = null
   try {
+    pf = await loadPortfolio(pfName, strDate, "lte")
+    if (pf) {
+      if (pf.date === strDate && force === false) {
+        console.info(
+          `updatePortfolioSingle[${pfName}, ${strDate}] already exists`
+        )
+        return
+      }
+    } else {
+      throw new Error(`Portfolio ${pfName} not found for date ${strDate}`)
+    }
+
+    // update portfolio with new date
+
     // load asset from API with portfolio.assets and date
     const values: Map<string, number> = new Map()
-    for (const asset of portfolioCfg.assets) {
-      const data = await loadAsset(asset, strDate)
+    for (const asset of pf.assets) {
+      const data = await queryAsset(asset.name, strDate)
       values.set(asset, data)
     }
-    await savePortfoliio(portfolioCfg.name, strDate, values)
-    console.info(`updatePortfolioSingle[${portfolioCfg.name}, ${strDate}] done`)
+    await savePortfoliio(pfName, strDate, values)
+    console.info(`updatePortfolioSingle[${pfName}, ${strDate}] done`)
   } catch (error) {
     console.error(
-      `Error in updatePortfolioSingle[${portfolioCfg.name}, ${strDate}]`,
+      `Error in updatePortfolioSingle[${pfName}, ${strDate}]`,
       error
     )
   }
@@ -55,13 +78,13 @@ const updatePortfolioSingle = async (
 // date: "2021-01-01"
 export const updatePortfolioAll = async (date: DateTime) => {
   try {
-    const portfolioCfgs = await PortfolioCfg.find()
-    for (const portfolio of portfolioCfgs) {
+    const allPortfolioList = await PortfolioList.find()
+    for (const portfolio of allPortfolioList) {
       await updatePortfolioSingle(portfolio, date)
     }
-    console.log("updatePortfolio executed successfully")
+    console.info("updatePortfolioAll executed successfully")
   } catch (error) {
-    console.error("Error executing updatePortfolio", error)
+    console.error("Error executing updatePortfolioAll", error)
   }
 }
 
