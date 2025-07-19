@@ -1,4 +1,4 @@
-import mongoose, { Document, Model } from "mongoose"
+import mongoose, { Document, Model, ObjectId } from "mongoose"
 
 interface IPortfolioList extends Document {
   name: string // name of the portfolio. e.g. "JB's Portfolio"
@@ -17,55 +17,62 @@ const PortfolioList: Model<IPortfolioList> = mongoose.model(
 )
 
 /*
-  asset history of the portfolio.
+  asset change history of the portfolio.
   e.g.
   {
     name: "JB's Portfolio",
     date: "2025-01-01",
-    assets: [
-      { name: "BTC", count: 10 },
-      { name: "ETH", count: 15 },
-      { name: "한화오션", count: 200 },
-    ],
+    asset: {
+      name: "BTC",
+      count: 10 ,
+      price: 150000,
+    },
   },
   {
     name: "JB's Portfolio",
     date: "2025-01-08",
-    assets: [
-      { name: "BTC", count: 10 },
-      { name: "ETH", count: 15 },
-      { name: "한화오션", count: 300 },
-    ]
+    asset: {
+      name: "한화오션",
+      count: 300 ,
+      price: 100000,
+    },
+  },
+  {
+    name: "JB's Portfolio",
+    date: "2025-01-18",
+    asset: {
+      name: "한화오션",
+      count: -100 ,
+      price: 100000,
+    },
   }
 */
-interface IPortfolioHistory extends Document {
-  name: string // name of the portfolioList. e.g. "JB's Portfolio"
+interface IPortfolioRecord {
+  _pfId: ObjectId // ObjectId of the portfolioList. e.g. "JB's Portfolio"
   date: string // target date. e.g. "2021-01-01"
-  assets: [
-    {
-      name: string // name of the asset. e.g. "BTC", "ETH", "KOSPI-한화오션"
-      count: number // number of the asset. e.g. 10, 15, 20
-    }
-  ]
+
+  _assetId: ObjectId // ObjectId of the asset. e.g. "BTC", "ETH", "KOSPI-한화오션"
+  change: number // changed number of the asset. e.g. 10, -5
+  price: number // price of the asset. e.g. 100000, 1000000
 }
 
-const PortfolioHistorySchema = new mongoose.Schema<IPortfolioHistory>({
-  name: { type: String, required: true },
+interface IPortfolioDoc extends IPortfolioRecord, Document {}
+
+const PortfolioSchema = new mongoose.Schema<IPortfolioDoc>({
+  _pfId: { type: mongoose.Schema.Types.ObjectId, required: true },
   date: { type: String, required: true },
-  assets: [
-    {
-      name: { type: String, required: true },
-      count: { type: Number, required: true },
-    },
-  ],
+
+  _assetId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  change: { type: Number, required: true },
+  price: { type: Number, required: true },
 })
 
-PortfolioHistorySchema.index({ name: 1, date: 1 }, { unique: true })
+PortfolioSchema.index({ _pfId: 1, date: 1 }, { unique: true })
 
 // 일별로 potfolio의 자산을 저장하고 있는 모델이다.
-const PortfolioHistory: Model<IPortfolioHistory> = mongoose.model(
+const Portfolio: Model<IPortfolioDoc> = mongoose.model(
   "portfolio",
-  PortfolioHistorySchema
+  PortfolioSchema
 )
 
-export { IPortfolioList, PortfolioList, IPortfolioHistory, PortfolioHistory }
+export { IPortfolioList, PortfolioList, IPortfolioDoc, Portfolio }

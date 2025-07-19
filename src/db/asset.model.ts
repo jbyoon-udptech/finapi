@@ -1,7 +1,7 @@
 import mongoose, { Document, Model } from "mongoose"
 
 interface IAsset {
-  type: string // "currency" | "crypto" | "KOSPI"| "KOSDAQ" | "NASDAQ" | "NYSE"
+  category: string // "currency" | "crypto" | "KOSPI"| "KOSDAQ" | "NASDAQ" | "NYSE"
   name: string // "ETH", "한화오션"
   ticker: string // "ETH", "042660"
   date: string // "2024-10-10"
@@ -9,11 +9,11 @@ interface IAsset {
   unit: string // "USD"
 }
 
-interface IAssetDocument extends IAsset, Document {}
+interface IAssetDoc extends IAsset, Document {}
 
 // Schemas and Models
-const AssetSchema = new mongoose.Schema<IAssetDocument>({
-  type: {
+const AssetSchema = new mongoose.Schema<IAssetDoc>({
+  category: {
     type: String,
     enum: ["currency", "crypto", "KOSPI", "KOSDAQ", "NASDAQ", "NYSE"],
     required: true,
@@ -25,6 +25,6 @@ const AssetSchema = new mongoose.Schema<IAssetDocument>({
   unit: { type: String, required: true },
 })
 
-const Asset: Model<IAssetDocument> = mongoose.model("asset", AssetSchema)
+const Asset: Model<IAssetDoc> = mongoose.model("asset", AssetSchema)
 
 export { IAsset, Asset }
