@@ -1,0 +1,29 @@
+@origin = http://localhost:3313
+@basePath = /api/portfolio
+
+###
+# Get all data
+GET {{origin}}{{basePath}}
+Content-Type: application/json
+
+###
+# Get 688dfb34991af7c0147ca7ab
+GET {{origin}}{{basePath}}/688dfee6991af7c0147ca905
+Content-Type: application/json
+
+###
+# write sample portfolio
+POST {{origin}}{{basePath}}
+Content-Type: application/json
+
+{
+  "name": "JB's Portfolio",
+  "currency": "KRW",
+  "timezone": "Asia/Seoul"
+}
+
+
+###
+# delete 688dfb34991af7c0147ca7ab
+DELETE {{origin}}{{basePath}}/688dfee6991af7c0147ca905
+Content-Type: application/json

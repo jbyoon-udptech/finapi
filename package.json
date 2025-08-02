@@ -8,25 +8,37 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npx tsc && node dist/app.js",
-    "build": "npx tsc"
+    "build": "npx tsc",
+    "serve": "npx tsc && nodemon dist/app.js",
+    "dev": "nodemon --exec ts-node src/app.ts",
+    "watch": "concurrently \"tsc --watch\" \"nodemon dist/app.js\""
   },
   "keywords": [],
   "dependencies": {
+    "@typegoose/typegoose": "^12.17.0",
     "axios": "^1.7.7",
     "body-parser": "^1.20.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "luxon": "^3.5.0",
     "mongoose": "^8.9.2",
-    "node-cron": "^3.0.3"
+    "morgan": "^1.10.1",
+    "node-cron": "^3.0.3",
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.0",
     "@types/luxon": "^3.4.2",
     "@types/mongoose": "^5.11.97",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^22.9.1",
     "@types/node-cron": "^3.0.11",
+    "concurrently": "^9.2.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   }
 }

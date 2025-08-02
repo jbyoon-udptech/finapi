@@ -1,0 +1,42 @@
+@origin = http://localhost:3313
+@basePath = /api/asset
+
+###
+# Get all data
+GET {{origin}}{{basePath}}
+Content-Type: application/json
+
+###
+# Get 688dfb34991af7c0147ca7ab
+GET {{origin}}{{basePath}}/688dfb34991af7c0147ca7ab
+Content-Type: application/json
+
+###
+# write BTC
+POST {{origin}}{{basePath}}
+Content-Type: application/json
+
+{
+  "category": "crypto",
+  "name": "KRWBTC",
+  "ticker": "BTC",
+  "unit": "KRW"
+}
+
+###
+# write KOSPI/한화오션
+POST {{origin}}{{basePath}}
+Content-Type: application/json
+
+{
+  "category": "KOSPI",
+  "name": "한화오션",
+  "ticker": "042660",
+  "unit": "KRW"
+}
+
+
+###
+# delete 688dfb34991af7c0147ca7ab
+DELETE {{origin}}{{basePath}}/688dfb34991af7c0147ca7ab
+Content-Type: application/json

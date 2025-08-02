@@ -1,0 +1,67 @@
+@origin = http://localhost:3313
+@basePath = /api/pfassetrecord
+
+###
+# Get all data
+GET {{origin}}{{basePath}}
+Content-Type: application/json
+
+###
+# Get 688dfb34991af7c0147ca7ab
+GET {{origin}}{{basePath}}/688dfee6991af7c0147ca905
+Content-Type: application/json
+
+###
+# write sample portfolio
+POST {{origin}}{{basePath}}
+Content-Type: application/json
+
+{
+    "_pfId": "688dfee6991af7c0147ca905",
+    "_assetId": "688dfb7e991af7c0147ca7c3",
+    "date": "2025-01-10",
+    "change": 100,
+    "result": 0,
+    "price": 0,
+    "unit": "KRW",
+    "memo": "Sample portfolio entry"
+}
+
+###
+# update sample portfolio
+PUT {{origin}}{{basePath}}/688e059db3baf04739a765f4
+Content-Type: application/json
+
+{
+  "_pfId": "688dfee6991af7c0147ca905",
+  "_assetId": "688dfb7e991af7c0147ca7c3",
+  "date": "2025-01-10",
+  "change": 120,
+  "result": 0,
+  "price": 0,
+  "unit": "KRW",
+  "memo": "Sample portfolio entry"
+}
+
+###
+# update sample portfolio
+PUT {{origin}}{{basePath}}/688e059db3baf04739a765f4
+Content-Type: application/json
+
+{
+  "_id": "688e059db3baf04739a765f4",
+  "_pfId": "688dfee6991af7c0147ca905",
+  "_assetId": "688dfb7e991af7c0147ca7c3",
+  "date": "2025-01-10",
+  "change": 120,
+  "result": 0,
+  "price": 0,
+  "unit": "KRW",
+  "memo": "Sample portfolio entry"
+}
+
+
+###
+# delete 688dfb34991af7c0147ca7ab
+DELETE {{origin}}{{basePath}}/688e04a5991af7c0147caba2
+Content-Type: application/json

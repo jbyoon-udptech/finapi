@@ -3,15 +3,46 @@ import { DateTime } from "luxon"
 import crypto from "./crypto"
 import currency from "./currency"
 import user from "./user"
-import { updatePortfolioAll } from "../scheduler"
+
+import asset from "../db/asset.api"
+import portfolio from "../db/portfolio.api"
+import pfassetrecord from "../db/pfassetrecord.api"
+
+import { updatePortfolioAll } from "../db/portfolio.ctrl"
+import fs from "fs"
 
 const router = Router()
 
+router.get("/health", (req: Request, res: Response) => {
+  res.status(200).send(`OK ${new Date().toISOString()}`)
+})
+
+router.get("/version", (req: Request, res: Response) => {
+  const pkg = fs.readFileSync("./package.json", "utf-8")
+  if (!pkg) {
+    res.status(500).send("Package file not found")
+    return
+  }
+  const packageJson = JSON.parse(pkg)
+
+  res.setHeader("Content-Type", "application/json")
+  res.status(200).send({
+    version: packageJson.version,
+    date: new Date().toISOString(),
+  })
+})
+
+// finantial APIs
 router.use("/crypto", crypto)
 router.use("/currency", currency)
 router.use("/stock", crypto)
 
-router.get("/scheduler", async (req: Request, res: Response) => {
+// fin APIs
+router.use("/asset", asset)
+router.use("/portfolio", portfolio)
+router.use("/pfassetrecord", pfassetrecord)
+
+router.get("/updatePortfolio", async (req: Request, res: Response) => {
   const date = req.query.date as string
   const { name, assets } = req.body
   try {
@@ -19,9 +50,9 @@ router.get("/scheduler", async (req: Request, res: Response) => {
       ? DateTime.fromFormat(date, "yyyy-MM-dd")
       : DateTime.now()
     await updatePortfolioAll(nDate)
-    res.status(201).send("scheduler updated")
+    res.status(201).send("portfolio updated")
   } catch (error) {
-    res.status(500).send("Error in executing scheduler")
+    res.status(500).send("Error in executing portfolio update")
   }
 })
 

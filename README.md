@@ -41,7 +41,7 @@ finance api for asset & Portfolio
 
 - Portfolio 생성
   - 이름(Name): "JB's PF"라는 식의 이름 지정
-  - 화폐표시단위(DisplayCurreny): KRW
+  - 기본 화폐 표시 단위(Default Curreny): KRW
 - Portfolid에 Asset들을 추가
   - New Asset의 설정 항목
     - Categroy(종류): "Cyrpto"
@@ -59,7 +59,7 @@ finance api for asset & Portfolio
     - Date(날짜): "2025-01-10" // default 현재시각
 - Portfolio에서 "KRW현금" Asset을 생성 후 추가
   - Asset을 설정 항목
-    - Categroy(종류): "Cash"
+    - Categroy(종류): "Currency"
     - Ticker(항목): "KRW"
     - Name(이름) : "한화" // default 항목명
     - Unit(Value의 단위, 화폐단위): "KRW"
@@ -68,20 +68,30 @@ finance api for asset & Portfolio
 
 - Portfolio의 Asset이 변경되는 경우
   - Portfolio에서 Asset을 선택
-    - Date: default은 현재
     - Value : +10 or -10
+    - Date: default은 현재시각
     - memo : "월입금" // 필요한 경우 memo항목 추가
 
 - 해당 Asset의 Value(갯수)가 0인 경우만 삭제가능
 
 - Portfolio 조회
-  - 모든 Asset의 가격을 해당 currency로 표시.
+  - 모든 Asset의 가격을 해당 Currency 표시.
     - 사용자가 원하는경우 특정 화폐로 변환하여 표시 가능.
+  - 특정일의 portfolio를 표시
+  - 과거 특정일 데이터도 조회가능
   - 과거 일자별로 조회가능
     - 오늘, 지난 한달, 올해, from ~ to
+  - 조회시 출력되는 항목
+    - 날짜
+    - 총 금액
+    - Asset별
+      - 개수
+      - 가격
+      - 총 금액
 
 - 일자별 데이터 생성
   - 일자별 portfolio 조회를 위해서 등록된 모든 Asset의 날짜별 가격을 내부 DB에 저장한다.
+    - 저장할 필요가 일을까?
 
 
 

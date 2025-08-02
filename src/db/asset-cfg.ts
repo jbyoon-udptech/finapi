@@ -1,9 +1,10 @@
 import axios from "axios"
-import { IAsset, Asset } from "./asset.model"
+import { Asset, AssetModel } from "./asset.model"
+import { getAsset } from "./asset.ctrl"
 
 // save asset to the database
-export const saveAsset = async (asset: IAsset) => {
-  const nAsset = new Asset(asset)
+export const saveAsset = async (asset: Asset) => {
+  const nAsset = new AssetModel(asset)
   await nAsset.save()
 }
 
@@ -11,12 +12,12 @@ export const saveAsset = async (asset: IAsset) => {
 export const loadAsset = async (
   assetName: string,
   date: string
-): Promise<IAsset | null> => {
-  const data = await Asset.findOne({ date, name: assetName }).exec()
+): Promise<Asset | null> => {
+  const data = await AssetModel.findOne({ date, name: assetName }).exec()
   if (!data) {
     return null
   }
-  return data.toObject() as IAsset
+  return data.toObject() as Asset
 }
 
 /**
@@ -27,16 +28,26 @@ export const loadAsset = async (
 export const queryAsset = async (
   name: string,
   date: string
-): Promise<IAsset | null> => {
+): Promise<Asset | null> => {
+  // First try to load from database
+  const existingAsset = await loadAsset(name, date)
+  if (existingAsset) {
+    return existingAsset
+  }
+
+  // If not found, fetch from external API (commented out for now)
+  /*
   const response = await axios.get(
-    `https://api.example.com/asset/${asset}?date=${
-      date.toISOString().split("T")[0]
-    }`
+    `https://api.example.com/asset/${name}?date=${date}`
   )
+  // Process response and save to database
+  */
+
+  return null
 }
 
 /**
- *  IAsset collection's configuration
+ *  Asset collection's configuration
  */
 class AssetCfg {
   name: string
@@ -52,13 +63,13 @@ class AssetCfg {
     return `${this.name} (${this.type}) - Ticker: ${this.ticker}`
   }
 
-  load(): Promise<IAsset | null> {
+  load(): Promise<Asset | null> {
     return loadAsset(this.name, new Date().toISOString().split("T")[0])
   }
-  save(asset: IAsset): Promise<void> {
+  save(asset: Asset): Promise<void> {
     return saveAsset(asset)
   }
-  get(date: string): Promise<IAsset | null> {
+  get(date: string): Promise<Asset | null> {
     return getAsset(this.name, date)
   }
 }
