@@ -229,14 +229,14 @@ router.post("/", async (req, res) => {
     const newPortfolio = new PortfolioListModel({
       name,
       currency,
-      timezone
+      timezone,
     })
 
     const savedPortfolio = await newPortfolio.save()
 
     res.status(201).json({
       message: "Portfolio created successfully",
-      data: savedPortfolio
+      data: savedPortfolio,
     })
   } catch (error) {
     console.error("Error creating portfolio:", error)

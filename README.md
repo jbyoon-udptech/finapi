@@ -93,13 +93,6 @@ finance api for asset & Portfolio
   - 일자별 portfolio 조회를 위해서 등록된 모든 Asset의 날짜별 가격을 내부 DB에 저장한다.
     - 저장할 필요가 일을까?
 
-
-
-
-
-
-
-
 ## build & run
 
     npm install

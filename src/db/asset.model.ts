@@ -1,13 +1,12 @@
 import { getModelForClass, prop, index, modelOptions } from "@typegoose/typegoose"
 import { ObjectId } from "mongoose"
 
-
 @index({ category: 1, ticker: 1, unit: 1 }, { unique: true })
 @modelOptions({ schemaOptions: { collection: "assetlist" } })
 export class AssetList {
   @prop({
     required: true,
-    enum: ["currency", "crypto", "KOSPI", "KOSDAQ", "NASDAQ", "NYSE"]
+    enum: ["currency", "crypto", "KOSPI", "KOSDAQ", "NASDAQ", "NYSE"],
   })
   public category!: string // "currency" | "crypto" | "KOSPI"| "KOSDAQ" | "NASDAQ" | "NYSE"
 
@@ -40,7 +39,6 @@ export class AssetPrice {
 
   @prop()
   public unit!: string // "USD"
-
 }
 
 const AssetPriceModel = getModelForClass(AssetPrice)

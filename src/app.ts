@@ -1,9 +1,9 @@
-import "reflect-metadata"
-import express, { Request, Response } from "express"
+import dotenv from "dotenv"
+import express from "express"
+import mongoose from "mongoose"
 import morgan from "morgan"
 import cron from "node-cron"
-import dotenv from "dotenv"
-import mongoose from "mongoose"
+import "reflect-metadata"
 
 import router from "./api/routes"
 import { schedulerHandler } from "./scheduler"
@@ -28,9 +28,9 @@ app.use("/api", router)
 
 app
   .listen(PORT, () => {
-    console.log(`Server running at PORT:${PORT} at`, new Date().toISOString())
+    console.info(`Server running at PORT:${PORT} at`, new Date().toISOString())
   })
-  .on("error", (error) => {
+  .on("error", error => {
     throw new Error(error.message)
   })
 

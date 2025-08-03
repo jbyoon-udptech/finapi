@@ -1,9 +1,4 @@
-import {
-  getModelForClass,
-  prop,
-  index,
-  modelOptions,
-} from "@typegoose/typegoose"
+import { getModelForClass, prop, index, modelOptions } from "@typegoose/typegoose"
 import { ObjectId } from "mongoose"
 
 import { AssetList } from "./asset.model"

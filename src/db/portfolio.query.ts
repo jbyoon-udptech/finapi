@@ -37,7 +37,7 @@ export const loadPortfolioAssetRecords = async (
     if (!assetRecords || assetRecords.length === 0) {
       return null
     }
-    return assetRecords.map((d) => d.toObject()) as PortfolioAssetRecord[]
+    return assetRecords.map(d => d.toObject()) as PortfolioAssetRecord[]
   } catch (error) {
     console.error(`Error loading portfolio[${portfolioName}]`, error)
     return null

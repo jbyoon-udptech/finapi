@@ -23,7 +23,7 @@ router.get("/", (req: Request, res: Response) => {
 // GET /users/:id - 특정 사용자 가져오기
 router.get("/:id", (req: Request<{ id: string }>, res: Response) => {
   const userId = parseInt(req.params.id, 10)
-  const user = users.find((u) => u.id === userId)
+  const user = users.find(u => u.id === userId)
 
   if (user) {
     res.json(user)

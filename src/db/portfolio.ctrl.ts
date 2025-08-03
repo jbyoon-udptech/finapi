@@ -1,18 +1,15 @@
-import { ObjectId } from "mongoose"
 import { DateTime } from "luxon"
 
 import { loadNupdateAssetPrice } from "./asset.ctrl"
 
 import {
-  PortfolioList,
-  PortfolioListModel,
   PortfolioAssetRecord,
   PortfolioAssetRecordModel,
+  PortfolioList,
+  PortfolioListModel,
 } from "./portfolio.model"
 
-export const updatePortfolioAssetRecord = async (
-  asset: PortfolioAssetRecord
-) => {
+export const updatePortfolioAssetRecord = async (asset: PortfolioAssetRecord) => {
   await PortfolioAssetRecordModel.updateOne(
     { _pfId: asset._pfId, _assetId: asset._assetId, date: asset.date },
     { $set: asset },
@@ -40,7 +37,7 @@ export const loadPortfolioAssetRecords = async (
   if (!data) {
     return null
   }
-  return data.map((d) => d.toObject()) as PortfolioAssetRecord[]
+  return data.map(d => d.toObject()) as PortfolioAssetRecord[]
 }
 
 // Update portfolio for the given date
@@ -91,10 +88,7 @@ const updatePortfolioforDate = async (
 }
 
 // Runs every day at midnight
-export const updatePortfolioAll = async (
-  date: DateTime,
-  force: boolean = false
-) => {
+export const updatePortfolioAll = async (date: DateTime, force: boolean = false) => {
   try {
     console.info("updatePortfolioAll start")
     const allPortfolioList = await PortfolioListModel.find()
@@ -110,8 +104,8 @@ export const updatePortfolioAll = async (
 // Cron job to update all portfolios
 export const cronUpdatePortfolioAll = async (now: DateTime) => {
   try {
+    console.info(`${now} : Cron job executed successfully`)
     await updatePortfolioAll(now, true)
-    console.log(`${now} : Cron job executed successfully`)
   } catch (error) {
     console.error("Error executing cron job", error)
   }

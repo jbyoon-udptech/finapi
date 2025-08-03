@@ -1,9 +1,8 @@
 // portfolio asset record APIs
 
-import { Router, Request, Response } from "express"
+import { Router } from "express"
 import mongoose from "mongoose"
-import { PortfolioAssetRecordModel } from "./portfolio.model"
-import { PortfolioListModel } from "./portfolio.model"
+import { PortfolioAssetRecordModel, PortfolioListModel } from "./portfolio.model"
 
 const router = Router({ mergeParams: true })
 
@@ -49,7 +48,9 @@ router.get("/:portfolioId/assetrecord", async (req, res) => {
       return res.status(404).json({ message: "Portfolio not found" })
     }
 
-    const data = await PortfolioAssetRecordModel.find({ _pfId: portfolioId }).sort({date: 1}).exec()
+    const data = await PortfolioAssetRecordModel.find({ _pfId: portfolioId })
+      .sort({ date: 1 })
+      .exec()
     res.json(data)
   } catch (error) {
     console.error("Error fetching asset records:", error)
@@ -233,23 +234,6 @@ interface IPortfolioAssetRecord {
 }
 
 /**
- * Create a new portfolio asset record
- * @param {IPortfolioAssetRecord} data - Portfolio asset record data to create
- * @throws {Error} When required fields are missing
- * @returns {Promise} Created portfolio asset record
- */
-const createPortfolio = async (data: IPortfolioAssetRecord) => {
-  const { _pfId, _assetId, date, change, result, price, unit, memo } = data
-
-  if (!_pfId || !_assetId || !date || !change || !unit) {
-    throw new Error("Portfolio ID, Asset ID, date, change, and unit are required")
-  }
-
-  const d: IPortfolioAssetRecord = data
-  return await PortfolioAssetRecordModel.create(d)
-}
-
-/**
  * @swagger
  * /api/portfolio/{portfolioId}/assetrecord:
  *   post:
@@ -311,7 +295,7 @@ router.post("/:portfolioId/assetrecord", async (req, res) => {
       return res.status(400).json({ message: "Invalid portfolio ID" })
     }
 
-    const portfolioId = req.params.portfolioId;
+    const portfolioId = req.params.portfolioId
 
     // Check if portfolio exists
     const portfolio = await PortfolioListModel.findById(portfolioId).exec()
@@ -319,13 +303,13 @@ router.post("/:portfolioId/assetrecord", async (req, res) => {
       return res.status(404).json({ message: "Portfolio not found" })
     }
 
-    const { _assetId, date, change, unit, result, price, memo } = req.body;
+    const { _assetId, date, change, unit, result, price, memo } = req.body
 
     // Validate required fields
     if (!_assetId || !date || change === undefined || !unit) {
       return res.status(400).json({
-        message: "All required fields must be provided"
-      });
+        message: "All required fields must be provided",
+      })
     }
 
     // Validate date format (simple check)
@@ -341,16 +325,16 @@ router.post("/:portfolioId/assetrecord", async (req, res) => {
       unit,
       result: result !== undefined ? result : 0,
       price: price !== undefined ? price : 0,
-      memo: memo || ""
-    };
+      memo: memo || "",
+    }
 
-    const newRecord = new PortfolioAssetRecordModel(data);
-    const savedRecord = await newRecord.save();
+    const newRecord = new PortfolioAssetRecordModel(data)
+    const savedRecord = await newRecord.save()
 
     res.status(201).json({
       message: "Asset record created successfully",
-      data: savedRecord
-    });
+      data: savedRecord,
+    })
   } catch (error) {
     console.error("Error creating asset record:", error)
     res.status(500).json({ message: "Error creating asset record" })
@@ -425,7 +409,7 @@ router.post("/:portfolioId/assetrecord", async (req, res) => {
  *               properties:
  *                 message:
  *                   type: string
-*/
+ */
 // @ts-ignore
 router.put("/:portfolioId/assetrecord/:id", async (req, res) => {
   try {
@@ -437,21 +421,21 @@ router.put("/:portfolioId/assetrecord/:id", async (req, res) => {
       return res.status(400).json({ message: "Invalid asset record ID" })
     }
 
-    const portfolioId = req.params.portfolioId;
-    const recordId = req.params.id;
-    const { change, result, price, unit, memo } = req.body;
+    const portfolioId = req.params.portfolioId
+    const recordId = req.params.id
+    const { change, result, price, unit, memo } = req.body
 
     // Validate required fields
     if (change === undefined || result === undefined || price === undefined || !unit) {
       return res.status(400).json({
-        message: "All required fields must be provided"
-      });
+        message: "All required fields must be provided",
+      })
     }
 
     // Check if record exists and belongs to portfolio
     const existingRecord = await PortfolioAssetRecordModel.findOne({
       _id: recordId,
-      _pfId: portfolioId
+      _pfId: portfolioId,
     }).exec()
 
     if (!existingRecord) {
@@ -471,7 +455,7 @@ router.put("/:portfolioId/assetrecord/:id", async (req, res) => {
       { new: true }
     ).exec()
 
-    res.status(200).json({ message: "Asset record updated successfully" })
+    res.status(200).json({ message: "Asset record updated successfully", data: updatedRecord })
   } catch (error) {
     console.error("Error updating asset record:", error)
     res.status(500).json({ message: "Error updating asset record" })
@@ -541,13 +525,13 @@ router.delete("/:portfolioId/assetrecord/:id", async (req, res) => {
       return res.status(400).json({ message: "Invalid asset record ID" })
     }
 
-    const portfolioId = req.params.portfolioId;
-    const recordId = req.params.id;
+    const portfolioId = req.params.portfolioId
+    const recordId = req.params.id
 
     // Check if record exists and belongs to portfolio
     const existingRecord = await PortfolioAssetRecordModel.findOne({
       _id: recordId,
-      _pfId: portfolioId
+      _pfId: portfolioId,
     }).exec()
 
     if (!existingRecord) {

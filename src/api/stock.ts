@@ -19,10 +19,7 @@ export const getStockData = async (ticker: string, date: string) => {
 // GET /api/stock/ETN?at=20211010
 router.get(
   "/:id",
-  async (
-    req: Request<{ id: string }, {}, {}, { date: string }>,
-    res: Response
-  ) => {
+  async (req: Request<{ id: string }, {}, {}, { date: string }>, res: Response) => {
     const ticker = req.params.id
     const { date } = req.query
 

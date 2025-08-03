@@ -1,15 +1,15 @@
-import { Router, Request, Response } from "express"
+import { Request, Response, Router } from "express"
 import { DateTime } from "luxon"
 import crypto from "./crypto"
 import currency from "./currency"
 import user from "./user"
 
 import asset from "../db/asset.api"
-import portfolio from "../db/portfolio.api"
 import assetrecord from "../db/assetrecord.api"
+import portfolio from "../db/portfolio.api"
 
-import { updatePortfolioAll } from "../db/portfolio.ctrl"
 import fs from "fs"
+import { updatePortfolioAll } from "../db/portfolio.ctrl"
 
 const router = Router()
 
@@ -46,11 +46,9 @@ router.use("/portfolio/:portfolioId/assetrecord", assetrecord)
 
 router.get("/updatePortfolio", async (req: Request, res: Response) => {
   const date = req.query.date as string
-  const { name, assets } = req.body
+  //const { name, assets } = req.body
   try {
-    const nDate = date
-      ? DateTime.fromFormat(date, "yyyy-MM-dd")
-      : DateTime.now()
+    const nDate = date ? DateTime.fromFormat(date, "yyyy-MM-dd") : DateTime.now()
     await updatePortfolioAll(nDate)
     res.status(201).send("portfolio updated")
   } catch (error) {

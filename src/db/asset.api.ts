@@ -236,14 +236,14 @@ router.post("/", async (req, res) => {
       name,
       ticker,
       category,
-      unit
+      unit,
     })
 
     const savedAsset = await newAsset.save()
 
     res.status(201).json({
       message: "Asset created successfully",
-      data: savedAsset
+      data: savedAsset,
     })
   } catch (error) {
     console.error("Error creating asset:", error)

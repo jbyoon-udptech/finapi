@@ -5,12 +5,14 @@ const router = Router()
 
 export const getCryptoData = async (ticker: string, date: string) => {
   //yyyy-MM-dd -> unix timestamp
-  const toTs = new Date(`${date}T00:00+0900`).getTime()/1000
-  const response = await axios.get(`https://min-api.cryptocompare.com/data/v2/histoday?fsym=${ticker}&tsym=USD&toTs=${toTs}`)
+  const toTs = new Date(`${date}T00:00+0900`).getTime() / 1000
+  const response = await axios.get(
+    `https://min-api.cryptocompare.com/data/v2/histoday?fsym=${ticker}&tsym=USD&toTs=${toTs}`
+  )
   if (response.data.Response === "Success") {
     const last = response.data.Data.Data.length - 1
     const data = response.data.Data.Data[last].close
-    return {value: data, "currency": "USD"}
+    return { value: data, currency: "USD" }
   } else {
     throw { code: response.data.Message }
   }
@@ -20,10 +22,7 @@ export const getCryptoData = async (ticker: string, date: string) => {
 // GET /api/cryto/BTC?date=20211010
 router.get(
   "/:id",
-  async (
-    req: Request<{ id: string }, {}, {}, { date: string }>,
-    res: Response
-  ) => {
+  async (req: Request<{ id: string }, {}, {}, { date: string }>, res: Response) => {
     const crytoId = req.params.id
     const { date } = req.query
 

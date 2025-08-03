@@ -1,12 +1,7 @@
 import mongoose from "mongoose"
 
 import { getFData } from "../api/fapi"
-import {
-  AssetPrice,
-  AssetPriceModel,
-  AssetList,
-  AssetListModel,
-} from "./asset.model"
+import { AssetPrice, AssetPriceModel, AssetList, AssetListModel } from "./asset.model"
 
 /**
  * request asset price from external API
@@ -41,10 +36,7 @@ export const updateAssetPrice = async (
 /**
  * Load asset from the database
  */
-export const loadAssetPrice = async (
-  assetId: string,
-  date: string
-): Promise<AssetPrice | null> => {
+export const loadAssetPrice = async (assetId: string, date: string): Promise<AssetPrice | null> => {
   const data = await AssetPriceModel.findOne({ _assetId: assetId, date }).exec()
   if (!data) {
     return null
@@ -84,10 +76,7 @@ export const loadNupdateAssetPrice = async (
       await updateAssetPrice(assetId, date, fdata.value, fdata.unit)
     }
   } catch (error) {
-    console.error(
-      `Error loading or updating asset price for ${assetId} on ${date}:`,
-      error
-    )
+    console.error(`Error loading or updating asset price for ${assetId} on ${date}:`, error)
     return null
   }
 
