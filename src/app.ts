@@ -34,6 +34,9 @@ app
     throw new Error(error.message)
   })
 
+// Export app for testing
+export { app }
+
 // Cron Handler called every hour at minute 0
 //cron.schedule("0 * * * *", async () => {
 // This will update all portfolios at midnight every day

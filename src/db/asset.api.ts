@@ -1,6 +1,7 @@
 // asset APIs
 
 import { Router, Request, Response } from "express"
+import mongoose from "mongoose"
 import { AssetList, AssetListModel } from "./asset.model"
 
 const router = Router()
@@ -63,13 +64,24 @@ router.get("/", async (req: Request, res: Response) => {
  *       500:
  *         description: Internal server error
  */
-router.get("/:id", async (req: Request<{ id: string }>, res: Response) => {
-  const asset = await AssetListModel.findById(req.params.id).exec()
+// @ts-ignore
+router.get("/:id", async (req, res) => {
+  try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid asset ID" })
+    }
 
-  if (asset) {
-    res.json(asset)
-  } else {
-    res.status(404).json({ message: "Asset not found" })
+    const asset = await AssetListModel.findById(req.params.id).exec()
+
+    if (asset) {
+      res.json(asset)
+    } else {
+      res.status(404).json({ message: "Asset not found" })
+    }
+  } catch (error) {
+    console.error("Error fetching asset:", error)
+    res.status(500).json({ message: "Error fetching asset" })
   }
 })
 
@@ -197,11 +209,42 @@ const updateAsset = async (data: IAsset) => {
  *                   type: string
  *                   example: "Error creating asset"
  */
-router.post("/", async (req: Request, res: Response) => {
+// @ts-ignore
+router.post("/", async (req, res) => {
   try {
-    const data: IAsset = req.body
-    await updateAsset(data)
-    res.status(201).json({ message: "Asset created successfully" })
+    const { name, ticker, category, unit } = req.body
+
+    // Validate required fields
+    if (!name || !ticker || !category || !unit) {
+      return res.status(400).json({ message: "Name, ticker, category, and unit are required" })
+    }
+
+    // Validate category
+    const validCategories = ["currency", "crypto", "KOSPI", "KOSDAQ", "NASDAQ", "NYSE"]
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({ message: "Invalid category" })
+    }
+
+    // Check if asset ticker already exists
+    const existingAsset = await AssetListModel.findOne({ category, ticker }).exec()
+    if (existingAsset) {
+      return res.status(400).json({ message: "Asset category&ticker already exists" })
+    }
+
+    // Create new asset
+    const newAsset = new AssetListModel({
+      name,
+      ticker,
+      category,
+      unit
+    })
+
+    const savedAsset = await newAsset.save()
+
+    res.status(201).json({
+      message: "Asset created successfully",
+      data: savedAsset
+    })
   } catch (error) {
     console.error("Error creating asset:", error)
     res.status(500).json({ message: "Error creating asset" })
@@ -262,10 +305,34 @@ router.post("/", async (req: Request, res: Response) => {
  *                   type: string
  *                   example: "Error updating asset"
  */
-router.put("/:id", async (req: Request<{ id: string }>, res: Response) => {
+// @ts-ignore
+router.put("/:id", async (req, res) => {
   try {
-    const data: IAsset = req.body
-    await updateAsset(data)
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid asset ID" })
+    }
+
+    const { name, ticker, category, unit } = req.body
+
+    // Validate required fields
+    if (!name || !ticker || !category || !unit) {
+      return res.status(400).json({ message: "Name, ticker, category, and unit are required" })
+    }
+
+    // Check if asset exists
+    const existingAsset = await AssetListModel.findById(req.params.id).exec()
+    if (!existingAsset) {
+      return res.status(404).json({ message: "Asset not found" })
+    }
+
+    // Update asset
+    const updatedAsset = await AssetListModel.findByIdAndUpdate(
+      req.params.id,
+      { name, ticker, category, unit },
+      { new: true }
+    ).exec()
+
     res.status(200).json({ message: "Asset updated successfully" })
   } catch (error) {
     console.error("Error updating asset:", error)
@@ -311,9 +378,22 @@ router.put("/:id", async (req: Request<{ id: string }>, res: Response) => {
  *                   type: string
  *                   example: "Error deleting asset"
  */
-router.delete("/:id", async (req: Request<{ id: string }>, res: Response) => {
+// @ts-ignore
+router.delete("/:id", async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid asset ID" })
+    }
+
     const assetId = req.params.id
+
+    // Check if asset exists before deleting
+    const existingAsset = await AssetListModel.findById(assetId).exec()
+    if (!existingAsset) {
+      return res.status(404).json({ message: "Asset not found" })
+    }
+
     await AssetListModel.findByIdAndDelete(assetId).exec()
     res.status(200).json({ message: "Asset deleted successfully" })
   } catch (error) {

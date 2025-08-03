@@ -1,6 +1,7 @@
 // portfolio APIs
 
 import { Router, Request, Response } from "express"
+import mongoose from "mongoose"
 import { PortfolioList, PortfolioListModel } from "./portfolio.model"
 
 const router = Router()
@@ -33,23 +34,32 @@ router.get("/", async (req: Request, res: Response) => {
  * @swagger
  * /api/portfolio/{id}:
  *   get:
- *     summary: Get portfolio by ID
- *     description: Retrieve a specific portfolio by its ID
+ *     summary: Get a specific portfolio by ID
  *     tags: [Portfolio]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: Portfolio ID
  *         schema:
  *           type: string
+ *         description: Portfolio unique identifier
  *     responses:
  *       200:
- *         description: Successfully retrieved the portfolio
+ *         description: Portfolio found
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Portfolio'
+ *       400:
+ *         description: Invalid portfolio ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid portfolio ID"
  *       404:
  *         description: Portfolio not found
  *         content:
@@ -63,13 +73,24 @@ router.get("/", async (req: Request, res: Response) => {
  *       500:
  *         description: Internal server error
  */
-router.get("/:id", async (req: Request<{ id: string }>, res: Response) => {
-  const portfolio = await PortfolioListModel.findById(req.params.id).exec()
+// @ts-ignore
+router.get("/:id", async (req, res) => {
+  try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid portfolio ID" })
+    }
 
-  if (portfolio) {
-    res.json(portfolio)
-  } else {
-    res.status(404).json({ message: "Portfolio not found" })
+    const portfolio = await PortfolioListModel.findById(req.params.id).exec()
+
+    if (portfolio) {
+      res.json(portfolio)
+    } else {
+      res.status(404).json({ message: "Portfolio not found" })
+    }
+  } catch (error) {
+    console.error("Error fetching portfolio:", error)
+    res.status(500).json({ message: "Error fetching portfolio" })
   }
 })
 
@@ -188,11 +209,35 @@ const updatePortfolio = async (data: IPortfolio) => {
  *                   type: string
  *                   example: "Error creating portfolio"
  */
-router.post("/", async (req: Request, res: Response) => {
+// @ts-ignore
+router.post("/", async (req, res) => {
   try {
-    const data: IPortfolio = req.body
-    await updatePortfolio(data)
-    res.status(201).json({ message: "Portfolio created successfully" })
+    const { name, currency, timezone } = req.body
+
+    // Validate required fields
+    if (!name || !currency || !timezone) {
+      return res.status(400).json({ message: "Name, currency, and timezone are required" })
+    }
+
+    // Check if portfolio name already exists
+    const existingPortfolio = await PortfolioListModel.findOne({ name }).exec()
+    if (existingPortfolio) {
+      return res.status(400).json({ message: "Portfolio name already exists" })
+    }
+
+    // Create new portfolio
+    const newPortfolio = new PortfolioListModel({
+      name,
+      currency,
+      timezone
+    })
+
+    const savedPortfolio = await newPortfolio.save()
+
+    res.status(201).json({
+      message: "Portfolio created successfully",
+      data: savedPortfolio
+    })
   } catch (error) {
     console.error("Error creating portfolio:", error)
     res.status(500).json({ message: "Error creating portfolio" })
@@ -253,10 +298,34 @@ router.post("/", async (req: Request, res: Response) => {
  *                   type: string
  *                   example: "Error updating portfolio"
  */
-router.put("/:id", async (req: Request<{ id: string }>, res: Response) => {
+// @ts-ignore
+router.put("/:id", async (req, res) => {
   try {
-    const data: IPortfolio = req.body
-    await updatePortfolio(data)
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid portfolio ID" })
+    }
+
+    const { name, currency, timezone } = req.body
+
+    // Validate required fields
+    if (!name || !currency || !timezone) {
+      return res.status(400).json({ message: "Name, currency, and timezone are required" })
+    }
+
+    // Check if portfolio exists
+    const existingPortfolio = await PortfolioListModel.findById(req.params.id).exec()
+    if (!existingPortfolio) {
+      return res.status(404).json({ message: "Portfolio not found" })
+    }
+
+    // Update portfolio
+    const updatedPortfolio = await PortfolioListModel.findByIdAndUpdate(
+      req.params.id,
+      { name, currency, timezone },
+      { new: true }
+    ).exec()
+
     res.status(200).json({ message: "Portfolio updated successfully" })
   } catch (error) {
     console.error("Error updating portfolio:", error)
@@ -302,9 +371,22 @@ router.put("/:id", async (req: Request<{ id: string }>, res: Response) => {
  *                   type: string
  *                   example: "Error deleting portfolio"
  */
-router.delete("/:id", async (req: Request<{ id: string }>, res: Response) => {
+// @ts-ignore
+router.delete("/:id", async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid portfolio ID" })
+    }
+
     const portfolioId = req.params.id
+
+    // Check if portfolio exists before deleting
+    const existingPortfolio = await PortfolioListModel.findById(portfolioId).exec()
+    if (!existingPortfolio) {
+      return res.status(404).json({ message: "Portfolio not found" })
+    }
+
     await PortfolioListModel.findByIdAndDelete(portfolioId).exec()
     res.status(200).json({ message: "Portfolio deleted successfully" })
   } catch (error) {

@@ -1,7 +1,9 @@
 // portfolio asset record APIs
 
 import { Router, Request, Response } from "express"
+import mongoose from "mongoose"
 import { PortfolioAssetRecordModel } from "./portfolio.model"
+import { PortfolioListModel } from "./portfolio.model"
 
 const router = Router({ mergeParams: true })
 
@@ -31,10 +33,28 @@ const router = Router({ mergeParams: true })
  *       500:
  *         description: Internal server error
  */
-router.get("/", async (req: any, res: any) => {
-  const portfolioId = req.params.portfolioId
-  const data = await PortfolioAssetRecordModel.find({ _pfId: portfolioId }).exec()
-  res.json(data)
+// @ts-ignore
+router.get("/:portfolioId/assetrecord", async (req, res) => {
+  try {
+    // Validate portfolio ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.portfolioId)) {
+      return res.status(400).json({ message: "Invalid portfolio ID" })
+    }
+
+    const portfolioId = req.params.portfolioId
+
+    // Check if portfolio exists
+    const portfolio = await PortfolioListModel.findById(portfolioId).exec()
+    if (!portfolio) {
+      return res.status(404).json({ message: "Portfolio not found" })
+    }
+
+    const data = await PortfolioAssetRecordModel.find({ _pfId: portfolioId }).sort({date: 1}).exec()
+    res.json(data)
+  } catch (error) {
+    console.error("Error fetching asset records:", error)
+    res.status(500).json({ message: "Error fetching asset records" })
+  }
 })
 
 /**
@@ -77,15 +97,36 @@ router.get("/", async (req: any, res: any) => {
  *       500:
  *         description: Internal server error
  */
-router.get("/:id", async (req: any, res: any) => {
-  const portfolioId = req.params.portfolioId
-  const recordId = req.params.id
-  const d = await PortfolioAssetRecordModel.findOne({ _id: recordId, _pfId: portfolioId }).exec()
+// @ts-ignore
+router.get("/:portfolioId/assetrecord/:id", async (req, res) => {
+  try {
+    // Validate ObjectId formats
+    if (!mongoose.Types.ObjectId.isValid(req.params.portfolioId)) {
+      return res.status(400).json({ message: "Invalid portfolio ID" })
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid asset record ID" })
+    }
 
-  if (d) {
-    res.json(d)
-  } else {
-    res.status(404).json({ message: "Portfolio asset record not found" })
+    const portfolioId = req.params.portfolioId
+    const recordId = req.params.id
+
+    const d = await PortfolioAssetRecordModel.findOne({ _id: recordId, _pfId: portfolioId }).exec()
+
+    if (d) {
+      res.json(d)
+    } else {
+      // Check if record exists but belongs to different portfolio
+      const recordExists = await PortfolioAssetRecordModel.findById(recordId).exec()
+      if (recordExists) {
+        res.status(404).json({ message: "Asset record not found in this portfolio" })
+      } else {
+        res.status(404).json({ message: "Asset record not found" })
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching asset record:", error)
+    res.status(500).json({ message: "Error fetching asset record" })
   }
 })
 
@@ -262,36 +303,57 @@ const createPortfolio = async (data: IPortfolioAssetRecord) => {
  *                   type: string
  *                   example: "Error creating portfolio asset record"
  */
-router.post("/", async (req: any, res: any) => {
+// @ts-ignore
+router.post("/:portfolioId/assetrecord", async (req, res) => {
   try {
+    // Validate portfolio ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.portfolioId)) {
+      return res.status(400).json({ message: "Invalid portfolio ID" })
+    }
+
     const portfolioId = req.params.portfolioId;
+
+    // Check if portfolio exists
+    const portfolio = await PortfolioListModel.findById(portfolioId).exec()
+    if (!portfolio) {
+      return res.status(404).json({ message: "Portfolio not found" })
+    }
+
     const { _assetId, date, change, unit, result, price, memo } = req.body;
 
-    if (!portfolioId || !_assetId || !date || change === undefined || unit === undefined) {
+    // Validate required fields
+    if (!_assetId || !date || change === undefined || !unit) {
       return res.status(400).json({
-        message: "Portfolio ID, Asset ID, date, change, and unit are required"
+        message: "All required fields must be provided"
       });
     }
 
-    const data: IPortfolioAssetRecord = {
+    // Validate date format (simple check)
+    if (isNaN(Date.parse(date))) {
+      return res.status(400).json({ message: "Invalid date format" })
+    }
+
+    const data = {
       _pfId: portfolioId,
       _assetId,
       date,
       change,
       unit,
-      result: result || 0,
-      price: price || 0,
+      result: result !== undefined ? result : 0,
+      price: price !== undefined ? price : 0,
       memo: memo || ""
     };
 
-    const rs = await createPortfolio(data);
+    const newRecord = new PortfolioAssetRecordModel(data);
+    const savedRecord = await newRecord.save();
+
     res.status(201).json({
-      message: "Portfolio asset record created successfully",
-      data: rs
+      message: "Asset record created successfully",
+      data: savedRecord
     });
   } catch (error) {
-    console.error("Error creating portfolio asset record:", error);
-    res.status(500).json({ message: "Error creating portfolio asset record" });
+    console.error("Error creating asset record:", error)
+    res.status(500).json({ message: "Error creating asset record" })
   }
 })
 
@@ -364,44 +426,55 @@ router.post("/", async (req: any, res: any) => {
  *                 message:
  *                   type: string
 */
-router.put("/:id", async (req: any, res: any) => {
+// @ts-ignore
+router.put("/:portfolioId/assetrecord/:id", async (req, res) => {
   try {
-    const portfolioId = req.params.portfolioId;
-    const { _assetId, date, change, unit, result, price, memo } = req.body;
+    // Validate ObjectId formats
+    if (!mongoose.Types.ObjectId.isValid(req.params.portfolioId)) {
+      return res.status(400).json({ message: "Invalid portfolio ID" })
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid asset record ID" })
+    }
 
-    if (!portfolioId || !_assetId || !date || change === undefined || unit === undefined) {
+    const portfolioId = req.params.portfolioId;
+    const recordId = req.params.id;
+    const { change, result, price, unit, memo } = req.body;
+
+    // Validate required fields
+    if (change === undefined || result === undefined || price === undefined || !unit) {
       return res.status(400).json({
-        message: "Portfolio ID, Asset ID, date, change, and unit are required"
+        message: "All required fields must be provided"
       });
     }
 
-    const data: IPortfolioAssetRecord = {
-      _pfId: portfolioId,
-      _assetId,
-      date,
-      change,
-      unit,
-      result: result || 0,
-      price: price || 0,
-      memo: memo || ""
-    };
+    // Check if record exists and belongs to portfolio
+    const existingRecord = await PortfolioAssetRecordModel.findOne({
+      _id: recordId,
+      _pfId: portfolioId
+    }).exec()
 
-    const rs = await PortfolioAssetRecordModel.updateOne(
-      { _id: req.params.id, _pfId: portfolioId },
-      data
-    ).exec();
-
-    if (rs.matchedCount === 0) {
-      return res.status(404).json({ message: "Portfolio asset record not found" });
+    if (!existingRecord) {
+      // Check if record exists but belongs to different portfolio
+      const recordExists = await PortfolioAssetRecordModel.findById(recordId).exec()
+      if (recordExists) {
+        return res.status(404).json({ message: "Asset record not found in this portfolio" })
+      } else {
+        return res.status(404).json({ message: "Asset record not found" })
+      }
     }
 
-    res.status(200).json({
-      message: "Portfolio asset record updated successfully",
-      data: rs
-    });
+    // Update record
+    const updatedRecord = await PortfolioAssetRecordModel.findByIdAndUpdate(
+      recordId,
+      { change, result, price, unit, memo },
+      { new: true }
+    ).exec()
+
+    res.status(200).json({ message: "Asset record updated successfully" })
   } catch (error) {
-    console.error("Error updating portfolio asset record:", error);
-    res.status(500).json({ message: "Error updating portfolio asset record" });
+    console.error("Error updating asset record:", error)
+    res.status(500).json({ message: "Error updating asset record" })
   }
 })
 
@@ -457,24 +530,44 @@ router.put("/:id", async (req: any, res: any) => {
  *                   type: string
  *                   example: "Error deleting portfolio asset record"
  */
-router.delete("/:id", async (req: any, res: any) => {
+// @ts-ignore
+router.delete("/:portfolioId/assetrecord/:id", async (req, res) => {
   try {
+    // Validate ObjectId formats
+    if (!mongoose.Types.ObjectId.isValid(req.params.portfolioId)) {
+      return res.status(400).json({ message: "Invalid portfolio ID" })
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid asset record ID" })
+    }
+
     const portfolioId = req.params.portfolioId;
     const recordId = req.params.id;
 
-    const rs = await PortfolioAssetRecordModel.findOneAndDelete({
+    // Check if record exists and belongs to portfolio
+    const existingRecord = await PortfolioAssetRecordModel.findOne({
       _id: recordId,
       _pfId: portfolioId
-    }).exec();
+    }).exec()
 
-    if (rs) {
-      res.status(200).json({ message: "Portfolio asset record deleted successfully" });
-    } else {
-      res.status(404).json({ message: "Portfolio asset record not found" });
+    if (!existingRecord) {
+      // Check if record exists but belongs to different portfolio
+      const recordExists = await PortfolioAssetRecordModel.findById(recordId).exec()
+      if (recordExists) {
+        return res.status(404).json({ message: "Asset record not found in this portfolio" })
+      } else {
+        return res.status(404).json({ message: "Asset record not found" })
+      }
     }
+
+    // Delete record
+    await PortfolioAssetRecordModel.findByIdAndDelete(recordId).exec()
+
+    res.status(200).json({ message: "Asset record deleted successfully" })
   } catch (error) {
-    console.error("Error deleting portfolio asset record:", error);
-    res.status(500).json({ message: "Error deleting portfolio asset record" });
+    console.error("Error deleting asset record:", error)
+    res.status(500).json({ message: "Error deleting asset record" })
   }
 })
+
 export default router
