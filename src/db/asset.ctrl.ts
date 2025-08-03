@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 
 import { getFData } from "../api/fapi"
-import { AssetPrice, AssetPriceModel, AssetList, AssetListModel } from "./asset.model"
+import { AssetListModel, AssetPrice, AssetPriceModel } from "./asset.model"
 
 /**
  * request asset price from external API

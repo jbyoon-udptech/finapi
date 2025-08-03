@@ -1,0 +1,13 @@
+@basePath = https://min-api.cryptocompare.com/data/v2/histoday
+
+###
+# Get BTC to USD historical data. 1752073200 = new Date(`2025-07-10T00:00+0900`).getTime() / 1000
+GET {{basePath}}
+?fsym=BTC
+&tsym=USD
+&toTs=1752073200
+Content-Type: application/json
+
+
+
+

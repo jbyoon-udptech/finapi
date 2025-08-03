@@ -2,6 +2,7 @@ import { DateTime } from "luxon"
 
 import { loadNupdateAssetPrice } from "./asset.ctrl"
 
+import mongoose from "mongoose"
 import {
   PortfolioAssetRecord,
   PortfolioAssetRecordModel,
@@ -42,7 +43,7 @@ export const loadPortfolioAssetRecords = async (
 
 // Update portfolio for the given date
 const updatePortfolioforDate = async (
-  portfolio: PortfolioList & { _id: any },
+  portfolio: PortfolioList & { _id: mongoose.Types.ObjectId },
   date: DateTime,
   force: boolean = false
 ) => {

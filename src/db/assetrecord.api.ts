@@ -32,7 +32,7 @@ const router = Router({ mergeParams: true })
  *       500:
  *         description: Internal server error
  */
-// @ts-ignore
+// @ts-expect-error portfolioId is a path parameter
 router.get("/:portfolioId/assetrecord", async (req, res) => {
   try {
     // Validate portfolio ObjectId format
@@ -98,7 +98,7 @@ router.get("/:portfolioId/assetrecord", async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-// @ts-ignore
+// @ts-expect-error portfolioId is a path parameter
 router.get("/:portfolioId/assetrecord/:id", async (req, res) => {
   try {
     // Validate ObjectId formats
@@ -222,16 +222,6 @@ router.get("/:portfolioId/assetrecord/:id", async (req, res) => {
  *           description: Transaction memo
  *           example: "Bought 3.1 ETH at 2300 USD"
  */
-interface IPortfolioAssetRecord {
-  _pfId: string
-  _assetId: string
-  date: string
-  change: number
-  result: number
-  price: number
-  unit: string
-  memo: string
-}
 
 /**
  * @swagger
@@ -287,7 +277,7 @@ interface IPortfolioAssetRecord {
  *                   type: string
  *                   example: "Error creating portfolio asset record"
  */
-// @ts-ignore
+// @ts-expect-error portfolioId is a path parameter
 router.post("/:portfolioId/assetrecord", async (req, res) => {
   try {
     // Validate portfolio ObjectId format
@@ -410,7 +400,7 @@ router.post("/:portfolioId/assetrecord", async (req, res) => {
  *                 message:
  *                   type: string
  */
-// @ts-ignore
+// @ts-expect-error portfolioId is a path parameter
 router.put("/:portfolioId/assetrecord/:id", async (req, res) => {
   try {
     // Validate ObjectId formats
@@ -514,7 +504,8 @@ router.put("/:portfolioId/assetrecord/:id", async (req, res) => {
  *                   type: string
  *                   example: "Error deleting portfolio asset record"
  */
-// @ts-ignore
+
+// @ts-expect-error portfolioId is a path parameter
 router.delete("/:portfolioId/assetrecord/:id", async (req, res) => {
   try {
     // Validate ObjectId formats

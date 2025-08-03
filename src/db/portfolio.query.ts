@@ -1,10 +1,8 @@
 import { DateTime } from "luxon"
-import { loadNupdateAssetPrice } from "./asset.ctrl"
 import {
-  PortfolioList,
-  PortfolioListModel,
   PortfolioAssetRecord,
   PortfolioAssetRecordModel,
+  PortfolioListModel,
 } from "./portfolio.model"
 
 /**

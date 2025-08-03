@@ -1,8 +1,8 @@
 // portfolio APIs
 
-import { Router, Request, Response } from "express"
+import { Request, Response, Router } from "express"
 import mongoose from "mongoose"
-import { PortfolioList, PortfolioListModel } from "./portfolio.model"
+import { PortfolioListModel } from "./portfolio.model"
 
 const router = Router()
 
@@ -73,7 +73,7 @@ router.get("/", async (req: Request, res: Response) => {
  *       500:
  *         description: Internal server error
  */
-// @ts-ignore
+// @ts-expect-error id is a path parameter
 router.get("/:id", async (req, res) => {
   try {
     // Validate ObjectId format
@@ -142,27 +142,6 @@ router.get("/:id", async (req, res) => {
  *           description: Portfolio timezone
  *           example: "Asia/Seoul"
  */
-interface IPortfolio {
-  name: string
-  currency: string
-  timezone: string
-}
-
-/**
- * Update or create a portfolio
- * @param {IPortfolio} data - Portfolio data to update or create
- * @throws {Error} When required fields are missing
- */
-const updatePortfolio = async (data: IPortfolio) => {
-  const { name, currency, timezone } = data
-
-  if (!name || !currency || !timezone) {
-    throw new Error("Name, currency, and timezone are required")
-  }
-
-  const newPortfolio: IPortfolio = data
-  await PortfolioListModel.updateOne({ name }, newPortfolio, { upsert: true }).exec()
-}
 
 /**
  * @swagger
@@ -209,7 +188,8 @@ const updatePortfolio = async (data: IPortfolio) => {
  *                   type: string
  *                   example: "Error creating portfolio"
  */
-// @ts-ignore
+
+// @ts-expect-error id is a path parameter
 router.post("/", async (req, res) => {
   try {
     const { name, currency, timezone } = req.body
@@ -298,7 +278,7 @@ router.post("/", async (req, res) => {
  *                   type: string
  *                   example: "Error updating portfolio"
  */
-// @ts-ignore
+// @ts-expect-error id is a path parameter
 router.put("/:id", async (req, res) => {
   try {
     // Validate ObjectId format
@@ -326,7 +306,7 @@ router.put("/:id", async (req, res) => {
       { new: true }
     ).exec()
 
-    res.status(200).json({ message: "Portfolio updated successfully" })
+    res.status(200).json({ message: "Portfolio updated successfully", data: updatedPortfolio })
   } catch (error) {
     console.error("Error updating portfolio:", error)
     res.status(500).json({ message: "Error updating portfolio" })
@@ -371,7 +351,7 @@ router.put("/:id", async (req, res) => {
  *                   type: string
  *                   example: "Error deleting portfolio"
  */
-// @ts-ignore
+// @ts-expect-error id is a path parameter
 router.delete("/:id", async (req, res) => {
   try {
     // Validate ObjectId format

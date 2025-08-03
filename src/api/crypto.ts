@@ -1,7 +1,10 @@
-import { Router, Request, Response } from "express"
 import axios from "axios"
+import { Request, Response, Router } from "express"
 
 const router = Router()
+
+// https://developers.coindesk.com/documentation/data-api/spot_v1_historical_days
+// @TODO coindesk API for historical crypto data 로 변경하기
 
 export const getCryptoData = async (ticker: string, date: string) => {
   //yyyy-MM-dd -> unix timestamp
@@ -18,11 +21,30 @@ export const getCryptoData = async (ticker: string, date: string) => {
   }
 }
 
-// GET Crypto price at a specific time
-// GET /api/cryto/BTC?date=20211010
+// GET /api/cryto/BTC?date=2021-10-10
+/**
+ * @swagger
+ * /api/crypto/{id}:
+ *   get:
+ *     summary: Get historical crypto data
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The crypto asset ID
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         description: The date to get historical data for (format: yyyy-MM-dd)
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *       404:
+ *         description: Crypto asset not found
+ */
 router.get(
   "/:id",
-  async (req: Request<{ id: string }, {}, {}, { date: string }>, res: Response) => {
+  async (req: Request<{ id: string }, never, never, { date: string }>, res: Response) => {
     const crytoId = req.params.id
     const { date } = req.query
 

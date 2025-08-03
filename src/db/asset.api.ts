@@ -1,8 +1,8 @@
 // asset APIs
 
-import { Router, Request, Response } from "express"
+import { Request, Response, Router } from "express"
 import mongoose from "mongoose"
-import { AssetList, AssetListModel } from "./asset.model"
+import { AssetListModel } from "./asset.model"
 
 const router = Router()
 
@@ -64,7 +64,7 @@ router.get("/", async (req: Request, res: Response) => {
  *       500:
  *         description: Internal server error
  */
-// @ts-ignore
+// @ts-expect-error id is a path parameter
 router.get("/:id", async (req, res) => {
   try {
     // Validate ObjectId format
@@ -141,28 +141,6 @@ router.get("/:id", async (req, res) => {
  *           description: Asset unit value
  *           example: 1
  */
-interface IAsset {
-  category: string
-  name: string
-  ticker: string
-  unit: number
-}
-
-/**
- * Update or create an asset
- * @param {IAsset} data - Asset data to update or create
- * @throws {Error} When required fields are missing
- */
-const updateAsset = async (data: IAsset) => {
-  const { name, category, ticker, unit } = data
-
-  if (!category || !name || !ticker) {
-    throw new Error("Category, name, and ticker are required")
-  }
-
-  const newAsset: IAsset = data
-  await AssetListModel.updateOne({ name, category, ticker }, newAsset, { upsert: true }).exec()
-}
 
 /**
  * @swagger
@@ -209,7 +187,7 @@ const updateAsset = async (data: IAsset) => {
  *                   type: string
  *                   example: "Error creating asset"
  */
-// @ts-ignore
+// @ts-expect-error id is a path parameter
 router.post("/", async (req, res) => {
   try {
     const { name, ticker, category, unit } = req.body
@@ -305,7 +283,7 @@ router.post("/", async (req, res) => {
  *                   type: string
  *                   example: "Error updating asset"
  */
-// @ts-ignore
+// @ts-expect-error id is a path parameter
 router.put("/:id", async (req, res) => {
   try {
     // Validate ObjectId format
@@ -333,7 +311,7 @@ router.put("/:id", async (req, res) => {
       { new: true }
     ).exec()
 
-    res.status(200).json({ message: "Asset updated successfully" })
+    res.status(200).json({ message: "Asset updated successfully", data: updatedAsset })
   } catch (error) {
     console.error("Error updating asset:", error)
     res.status(500).json({ message: "Error updating asset" })
@@ -378,7 +356,7 @@ router.put("/:id", async (req, res) => {
  *                   type: string
  *                   example: "Error deleting asset"
  */
-// @ts-ignore
+// @ts-expect-error id is a path parameter
 router.delete("/:id", async (req, res) => {
   try {
     // Validate ObjectId format
