@@ -7,6 +7,7 @@ import mongoose from "mongoose"
 
 import router from "./api/routes"
 import { schedulerHandler } from "./scheduler"
+import { setupSwagger } from "./swagger"
 
 mongoose.connect("mongodb://localhost/finapi")
 
@@ -19,6 +20,9 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 const PORT = process.env.PORT || 3313
+
+// Setup Swagger documentation
+setupSwagger(app)
 
 app.use("/api", router)
 

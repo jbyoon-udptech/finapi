@@ -1,67 +1,47 @@
 @origin = http://localhost:3313
-@basePath = /api/pfassetrecord
+@basePath = /api/portfolio/688dfee6991af7c0147ca905/assetrecord
 
 ###
-# Get all data
+# Get all asset records for portfolio
 GET {{origin}}{{basePath}}
 Content-Type: application/json
 
 ###
-# Get 688dfb34991af7c0147ca7ab
+# Get specific asset record
 GET {{origin}}{{basePath}}/688dfee6991af7c0147ca905
 Content-Type: application/json
 
 ###
-# write sample portfolio
+# Create new portfolio asset record
 POST {{origin}}{{basePath}}
 Content-Type: application/json
 
 {
-    "_pfId": "688dfee6991af7c0147ca905",
     "_assetId": "688dfb7e991af7c0147ca7c3",
     "date": "2025-01-10",
     "change": 100,
     "result": 0,
     "price": 0,
     "unit": "KRW",
-    "memo": "Sample portfolio entry"
+    "memo": "Sample"
 }
 
 ###
-# update sample portfolio
+# Update portfolio asset record
 PUT {{origin}}{{basePath}}/688e059db3baf04739a765f4
 Content-Type: application/json
 
 {
-  "_pfId": "688dfee6991af7c0147ca905",
   "_assetId": "688dfb7e991af7c0147ca7c3",
   "date": "2025-01-10",
   "change": 120,
   "result": 0,
   "price": 0,
   "unit": "KRW",
-  "memo": "Sample portfolio entry"
+  "memo": "Updated portfolio entry"
 }
 
 ###
-# update sample portfolio
-PUT {{origin}}{{basePath}}/688e059db3baf04739a765f4
-Content-Type: application/json
-
-{
-  "_id": "688e059db3baf04739a765f4",
-  "_pfId": "688dfee6991af7c0147ca905",
-  "_assetId": "688dfb7e991af7c0147ca7c3",
-  "date": "2025-01-10",
-  "change": 120,
-  "result": 0,
-  "price": 0,
-  "unit": "KRW",
-  "memo": "Sample portfolio entry"
-}
-
-
-###
-# delete 688dfb34991af7c0147ca7ab
+# Delete portfolio asset record
 DELETE {{origin}}{{basePath}}/688e04a5991af7c0147caba2
 Content-Type: application/json

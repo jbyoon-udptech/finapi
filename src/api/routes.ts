@@ -6,7 +6,7 @@ import user from "./user"
 
 import asset from "../db/asset.api"
 import portfolio from "../db/portfolio.api"
-import pfassetrecord from "../db/pfassetrecord.api"
+import assetrecord from "../db/assetrecord.api"
 
 import { updatePortfolioAll } from "../db/portfolio.ctrl"
 import fs from "fs"
@@ -40,7 +40,9 @@ router.use("/stock", crypto)
 // fin APIs
 router.use("/asset", asset)
 router.use("/portfolio", portfolio)
-router.use("/pfassetrecord", pfassetrecord)
+
+// Nested route for portfolio asset records
+router.use("/portfolio/:portfolioId/assetrecord", assetrecord)
 
 router.get("/updatePortfolio", async (req: Request, res: Response) => {
   const date = req.query.date as string

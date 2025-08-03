@@ -7,7 +7,7 @@ const router = Router()
 
 /**
  * @swagger
- * /portfolio:
+ * /api/portfolio:
  *   get:
  *     summary: Get all portfolios
  *     description: Retrieve a list of all portfolios
@@ -31,7 +31,7 @@ router.get("/", async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /portfolio/{id}:
+ * /api/portfolio/{id}:
  *   get:
  *     summary: Get portfolio by ID
  *     description: Retrieve a specific portfolio by its ID
@@ -145,7 +145,7 @@ const updatePortfolio = async (data: IPortfolio) => {
 
 /**
  * @swagger
- * /portfolio:
+ * /api/portfolio:
  *   post:
  *     summary: Create a new portfolio
  *     description: Create a new portfolio with the provided information
@@ -201,7 +201,7 @@ router.post("/", async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /portfolio/{id}:
+ * /api/portfolio/{id}:
  *   put:
  *     summary: Update portfolio by ID
  *     description: Update an existing portfolio with the provided information
@@ -266,7 +266,7 @@ router.put("/:id", async (req: Request<{ id: string }>, res: Response) => {
 
 /**
  * @swagger
- * /portfolio/{id}:
+ * /api/portfolio/{id}:
  *   delete:
  *     summary: Delete portfolio by ID
  *     description: Delete a specific portfolio by its ID

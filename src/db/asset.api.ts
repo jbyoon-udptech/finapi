@@ -7,7 +7,7 @@ const router = Router()
 
 /**
  * @swagger
- * /asset:
+ * /api/asset:
  *   get:
  *     summary: Get all assets
  *     description: Retrieve a list of all assets
@@ -31,7 +31,7 @@ router.get("/", async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /asset/{id}:
+ * /api/asset/{id}:
  *   get:
  *     summary: Get asset by ID
  *     description: Retrieve a specific asset by its ID
@@ -154,7 +154,7 @@ const updateAsset = async (data: IAsset) => {
 
 /**
  * @swagger
- * /asset:
+ * /api/asset:
  *   post:
  *     summary: Create a new asset
  *     description: Create a new asset with the provided information
@@ -210,7 +210,7 @@ router.post("/", async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /asset/{id}:
+ * /api/asset/{id}:
  *   put:
  *     summary: Update asset by ID
  *     description: Update an existing asset with the provided information
@@ -275,7 +275,7 @@ router.put("/:id", async (req: Request<{ id: string }>, res: Response) => {
 
 /**
  * @swagger
- * /asset/{id}:
+ * /api/asset/{id}:
  *   delete:
  *     summary: Delete asset by ID
  *     description: Delete a specific asset by its ID
