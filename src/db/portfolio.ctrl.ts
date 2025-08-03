@@ -58,8 +58,7 @@ const updatePortfolioforDate = async (
       strDate,
       "lte"
     )
-    if (assetRecords?.length) {
-    } else {
+    if (!assetRecords?.length) {
       throw new Error(`Portfolio ${pfName} not found for date ${strDate}`)
     }
 
