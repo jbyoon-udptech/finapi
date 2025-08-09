@@ -1,10 +1,9 @@
-import request from "supertest"
 import express from "express"
 import mongoose from "mongoose"
-import { PortfolioListModel } from "../src/db/portfolio.model"
-import { PortfolioAssetRecordModel } from "../src/db/portfolio.model"
+import request from "supertest"
 import { AssetListModel } from "../src/db/asset.model"
 import assetRecordApi from "../src/db/assetrecord.api"
+import { PortfolioAssetRecordModel, PortfolioListModel } from "../src/db/portfolio.model"
 
 const app = express()
 app.use(express.json())
@@ -26,7 +25,7 @@ describe("AssetRecord API", () => {
     // Create test asset
     testAsset = new AssetListModel({
       name: "Bitcoin",
-      ticker: "BTC",
+      symbol: "BTC",
       category: "crypto",
       unit: "USD",
     })

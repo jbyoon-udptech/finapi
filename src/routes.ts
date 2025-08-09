@@ -1,19 +1,22 @@
 import { Request, Response, Router } from "express"
 import { DateTime } from "luxon"
-import crypto from "./crypto"
-import currency from "./currency"
-import user from "./user"
 
-import asset from "../db/asset.api"
-import assetrecord from "../db/assetrecord.api"
-import portfolio from "../db/portfolio.api"
+import crypto from "./api/crypto"
+import currency from "./api/currency"
+import stock from "./api/stock"
+import user from "./api/user"
+import yf from "./api/yf"
+
+import asset from "./db/asset.api"
+import assetrecord from "./db/assetrecord.api"
+import portfolio from "./db/portfolio.api"
 
 import fs from "fs"
-import { updatePortfolioAll } from "../db/portfolio.ctrl"
+import { updatePortfolioAll } from "./db/portfolio.ctrl"
 
 const router = Router()
 
-router.get("/health", (req: Request, res: Response) => {
+router.get("/health", (_req: Request, res: Response) => {
   res.status(200).send(`OK ${new Date().toISOString()}`)
 })
 
@@ -32,12 +35,13 @@ router.get("/version", (req: Request, res: Response) => {
   })
 })
 
-// finantial APIs
-router.use("/crypto", crypto)
-router.use("/currency", currency)
-router.use("/stock", crypto)
+// financial APIs
+router.use("/fapi/crypto", crypto)
+router.use("/fapi/currency", currency)
+router.use("/fapi/stock", stock)
+router.use("/fapi/yf", yf)
 
-// fin APIs
+// app APIs
 router.use("/asset", asset)
 router.use("/portfolio", portfolio)
 
@@ -57,8 +61,5 @@ router.get("/updatePortfolio", async (req: Request, res: Response) => {
 })
 
 router.use("/users", user)
-router.get("/hello", (request: Request, response: Response) => {
-  response.status(200).send(`Hello World: ${new Date().toISOString()}`)
-})
 
 export default router

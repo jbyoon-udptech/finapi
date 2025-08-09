@@ -5,13 +5,14 @@ import morgan from "morgan"
 import cron from "node-cron"
 import "reflect-metadata"
 
-import router from "./api/routes"
+import router from "./routes"
 import { schedulerHandler } from "./scheduler"
 import { setupSwagger } from "./swagger"
 
 mongoose.connect("mongodb://localhost/finapi")
 
 dotenv.config()
+// console.info("Environment variables loaded from .env file", process.env)
 const app = express()
 
 app.use(morgan("dev"))
@@ -24,7 +25,7 @@ const PORT = process.env.PORT || 3313
 // Setup Swagger documentation
 setupSwagger(app)
 
-app.use("/api", router)
+app.use("/", router)
 
 app
   .listen(PORT, () => {

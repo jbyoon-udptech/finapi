@@ -19,7 +19,7 @@ Content-Type: application/json
 {
   "category": "crypto",
   "name": "KRWBTC",
-  "ticker": "BTC",
+  "symbol": "BTC",
   "unit": "KRW"
 }
 
@@ -31,7 +31,7 @@ Content-Type: application/json
 {
   "category": "KOSPI",
   "name": "한화오션",
-  "ticker": "042660",
+  "symbol": "042660",
   "unit": "KRW"
 }
 

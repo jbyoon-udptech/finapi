@@ -1,24 +1,22 @@
 import mongoose from "mongoose"
 
-import { getFData } from "../api/fapi"
+import { requestFData } from "../api/fapi"
 import { AssetListModel, AssetPrice, AssetPriceModel } from "./asset.model"
 
 /**
- * request asset price from external API
+ * Load asset price from the database. (cached data)
  */
-
-export const requestAssetPrice = async (
-  category: string,
-  ticker: string,
-  date: string
-): Promise<{ value: number; unit: string } | null> => {
-  const fdata = await getFData(category, ticker, date)
-  if (!fdata) {
+export const loadAssetPrice = async (assetId: string, date: string): Promise<AssetPrice | null> => {
+  const data = await AssetPriceModel.findOne({ _assetId: assetId, date }).exec()
+  if (!data) {
     return null
   }
-  return { value: fdata.value, unit: fdata.currency }
+  return data.toObject() as AssetPrice
 }
 
+/**
+ * Update asset price in the database. (cached data)
+ */
 export const updateAssetPrice = async (
   assetId: string,
   date: string,
@@ -31,17 +29,6 @@ export const updateAssetPrice = async (
     { $set: asset },
     { upsert: true }
   )
-}
-
-/**
- * Load asset from the database
- */
-export const loadAssetPrice = async (assetId: string, date: string): Promise<AssetPrice | null> => {
-  const data = await AssetPriceModel.findOne({ _assetId: assetId, date }).exec()
-  if (!data) {
-    return null
-  }
-  return data.toObject() as AssetPrice
 }
 
 /**
@@ -63,7 +50,7 @@ export const loadNupdateAssetPrice = async (
 
     data = await loadAssetPrice(assetId, date)
     if (force || !data) {
-      const fdata = await requestAssetPrice(asset.category, asset.ticker, date)
+      const fdata = await requestFData(asset.category, asset.symbol, date)
       if (!fdata) {
         return data
       }
@@ -71,9 +58,9 @@ export const loadNupdateAssetPrice = async (
         _assetId: new mongoose.Schema.Types.ObjectId(assetId),
         date: date,
         value: fdata.value,
-        unit: fdata.unit,
+        unit: fdata.currency,
       }
-      await updateAssetPrice(assetId, date, fdata.value, fdata.unit)
+      await updateAssetPrice(assetId, date, data.value, data.unit)
     }
   } catch (error) {
     console.error(`Error loading or updating asset price for ${assetId} on ${date}:`, error)

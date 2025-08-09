@@ -15,7 +15,7 @@ finance api for asset & Portfolio
   - 특정 Asset에 대한 날짜별 값을 가지고 있는 DB
   - financial api를 이용하여 값을 읽어온 후 본 DB에 저장한다.
   - e.g. (한화오션, 2024-10-25): KRW 32500, (KRWUSD, 2025-01-20): KRW 1430
-  - Asset은 생성시 (category, ticker, name) 세가지를 입력으로 받는다.
+  - Asset은 생성시 (category, symbol, name) 세가지를 입력으로 받는다.
     - e.g. "KOSPI", "042660", "한화오션"
     - e.g. "NYSE", "ETN","Eaton"
     - 생성 후 Asset의 특정일 데이터를 요청하면 DB에 값이 있으면 바로 전달하고, 없으면 financial api를 이용하여 값을 읽어온 뒤 DB에 저장한 후 전달한다.

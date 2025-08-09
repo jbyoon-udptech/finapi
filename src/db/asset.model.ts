@@ -1,7 +1,7 @@
-import { getModelForClass, prop, index, modelOptions } from "@typegoose/typegoose"
+import { getModelForClass, index, modelOptions, prop } from "@typegoose/typegoose"
 import { ObjectId } from "mongoose"
 
-@index({ category: 1, ticker: 1, unit: 1 }, { unique: true })
+@index({ category: 1, symbol: 1, unit: 1 }, { unique: true })
 @modelOptions({ schemaOptions: { collection: "assetlist" } })
 export class AssetList {
   @prop({
@@ -14,7 +14,7 @@ export class AssetList {
   public name!: string // "ETH", "한화오션"
 
   @prop({ required: true })
-  public ticker!: string // "ETH", "042660"
+  public symbol!: string // "ETH", "042660"
 
   @prop({ required: true })
   public unit!: string // "USD"

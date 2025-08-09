@@ -1,11 +1,10 @@
 import axios from "axios"
 import { Request, Response, Router } from "express"
-import { DateTime } from "luxon"
 
-const router = Router()
+export const category = "currency"
 
-/*
-  curl `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=kafcch9C4fr3kjWiRMGlWzDOblqWqtln&searchdate=20250710&data=AP01`
+/* www.koreaexim.go.kr sample response
+  curl `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?searchdate=20250710&data=AP01`
   [
     {
       "result": 1,
@@ -24,22 +23,34 @@ const router = Router()
   ]
 */
 
+export const requestCurrencyData = async (symbol: string, date: string) => {
+  const toTs = new Date(`${date}T00:00+0900`).getTime() / 1000
+  const rs = await axios.get(
+    `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=kafcch9C4fr3kjWiRMGlWzDOblqWqtln&searchdate=${date}&data=AP01`
+  )
+  if (rs.data.Response === "Success") {
+    const target = rs.data.find((e: { cur_unit: string }) => e.cur_unit === symbol)
+    const value = target?.deal_bas_r ? target.deal_bas_r : 0
+
+    return { category, symbol, date, ts: toTs, value, currency: "KRW" }
+  } else {
+    throw { code: rs.data.Message }
+  }
+}
+
+const router = Router()
+
 // Currency price at a specific time
-// GET /api/currency/USD?at=20211010
+// GET /api/currency/USD?date=20211010
 router.get(
   "/:id",
-  async (req: Request<{ id: string }, never, never, { at: string }>, res: Response) => {
-    const cID = req.params.id
-    const { at } = req.query
-    const dt8 = at ? at : DateTime.now().toFormat("yyyyMMdd")
+  async (req: Request<{ id: string }, never, never, { date: string }>, res: Response) => {
+    const { id } = req.params
+    const { date } = req.query
 
     try {
-      const rs = await axios.get(
-        `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=kafcch9C4fr3kjWiRMGlWzDOblqWqtln&searchdate=${dt8}&data=AP01`
-      )
-      const target = rs.data.find((e: { cur_unit: string }) => e.cur_unit === cID)
-      const value = target?.deal_bas_r ? target.deal_bas_r : 0
-      res.json({ success: true, data: value })
+      const data = await requestCurrencyData(id, date)
+      res.json({ success: true, ...data })
     } catch (error) {
       console.error("Error fetching posts:", error)
       const ecode = error as { code: string }

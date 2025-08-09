@@ -1,25 +1,28 @@
 import axios from "axios"
 import { Request, Response, Router } from "express"
 
-const router = Router()
+export const category = "crypto"
 
 // https://developers.coindesk.com/documentation/data-api/spot_v1_historical_days
 // @TODO coindesk API for historical crypto data 로 변경하기
 
-export const getCryptoData = async (ticker: string, date: string) => {
+export const requestCryptoData = async (symbol: string, date: string) => {
   //yyyy-MM-dd -> unix timestamp
   const toTs = new Date(`${date}T00:00+0900`).getTime() / 1000
   const response = await axios.get(
-    `https://min-api.cryptocompare.com/data/v2/histoday?fsym=${ticker}&tsym=USD&toTs=${toTs}`
+    `https://min-api.cryptocompare.com/data/v2/histoday?fsym=${symbol}&tsym=USD&toTs=${toTs}`
   )
   if (response.data.Response === "Success") {
     const last = response.data.Data.Data.length - 1
     const data = response.data.Data.Data[last].close
-    return { value: data, currency: "USD" }
+
+    return { category, symbol, date, ts: toTs, value: data, currency: "USD" }
   } else {
     throw { code: response.data.Message }
   }
 }
+
+const router = Router()
 
 // GET /api/cryto/BTC?date=2021-10-10
 /**
@@ -49,7 +52,7 @@ router.get(
     const { date } = req.query
 
     try {
-      const data = await getCryptoData(crytoId, date)
+      const data = await requestCryptoData(crytoId, date)
       res.json({ success: true, ...data })
     } catch (error) {
       console.error("Error fetching posts:", error)

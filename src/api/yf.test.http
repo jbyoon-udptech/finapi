@@ -1,0 +1,57 @@
+@basePath = http://localhost:3313/fapi/yf
+
+#####################
+# Get GEV latest data.
+GET {{basePath}}/GEV
+Content-Type: application/json
+
+###
+# Get GEV historical data.
+GET {{basePath}}/GEV
+?date=20250807
+&tz=America/New_York
+Content-Type: application/json
+
+
+
+
+#####################
+# Get 삼성전자 latest data.
+GET {{basePath}}/005930.KS
+Content-Type: application/json
+
+###
+# Get JYP latest data.
+GET {{basePath}}/035900.KQ
+Content-Type: application/json
+
+###
+# Get Ryohin Keikaku Co., Ltd. (7453.T) latest data.
+GET {{basePath}}/7453.T
+Content-Type: application/json
+
+###
+# Get CATL (3750.HK) latest data.
+GET {{basePath}}/3750.HK
+Content-Type: application/json
+
+
+
+
+#####################
+# Get BTC-KRW latest data.
+GET {{basePath}}/BTC-KRW
+Content-Type: application/json
+
+
+
+#####################
+# Get USD/KRW latest data.
+GET {{basePath}}/USDKRW=X
+Content-Type: application/json
+
+###
+# Get JPY/KRW latest data.
+GET {{basePath}}/JPYKRW=X
+Content-Type: application/json
+

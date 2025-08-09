@@ -94,7 +94,7 @@ router.get("/:id", async (req, res) => {
  *       required:
  *         - category
  *         - name
- *         - ticker
+ *         - symbol
  *       properties:
  *         _id:
  *           type: string
@@ -108,20 +108,20 @@ router.get("/:id", async (req, res) => {
  *           type: string
  *           description: Asset name
  *           example: "ETH"
- *         ticker:
+ *         symbol:
  *           type: string
- *           description: Asset ticker symbol
+ *           description: Asset symbol
  *           example: "ETH"
  *         unit:
  *           type: number
- *           description: Asset unit value
+ *           description: Asset unit for value
  *           example: 1
  *     AssetInput:
  *       type: object
  *       required:
  *         - category
  *         - name
- *         - ticker
+ *         - symbol
  *       properties:
  *         category:
  *           type: string
@@ -132,13 +132,13 @@ router.get("/:id", async (req, res) => {
  *           type: string
  *           description: Asset name
  *           example: "ETH"
- *         ticker:
+ *         symbol:
  *           type: string
- *           description: Asset ticker symbol
+ *           description: Asset symbol
  *           example: "ETH"
  *         unit:
  *           type: number
- *           description: Asset unit value
+ *           description: Asset unit for value
  *           example: 1
  */
 
@@ -175,7 +175,7 @@ router.get("/:id", async (req, res) => {
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Category, name, and ticker are required"
+ *                   example: "Category, name, and symbol are required"
  *       500:
  *         description: Internal server error
  *         content:
@@ -190,11 +190,11 @@ router.get("/:id", async (req, res) => {
 // @ts-expect-error id is a path parameter
 router.post("/", async (req, res) => {
   try {
-    const { name, ticker, category, unit } = req.body
+    const { name, symbol, category, unit } = req.body
 
     // Validate required fields
-    if (!name || !ticker || !category || !unit) {
-      return res.status(400).json({ message: "Name, ticker, category, and unit are required" })
+    if (!name || !symbol || !category || !unit) {
+      return res.status(400).json({ message: "Name, symbol, category, and unit are required" })
     }
 
     // Validate category
@@ -203,16 +203,16 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Invalid category" })
     }
 
-    // Check if asset ticker already exists
-    const existingAsset = await AssetListModel.findOne({ category, ticker }).exec()
+    // Check if asset symbol already exists
+    const existingAsset = await AssetListModel.findOne({ category, symbol }).exec()
     if (existingAsset) {
-      return res.status(400).json({ message: "Asset category&ticker already exists" })
+      return res.status(400).json({ message: "Asset category&symbol already exists" })
     }
 
     // Create new asset
     const newAsset = new AssetListModel({
       name,
-      ticker,
+      symbol,
       category,
       unit,
     })
@@ -269,7 +269,7 @@ router.post("/", async (req, res) => {
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Category, name, and ticker are required"
+ *                   example: "Category, name, and symbol are required"
  *       404:
  *         description: Asset not found
  *       500:
@@ -291,11 +291,11 @@ router.put("/:id", async (req, res) => {
       return res.status(400).json({ message: "Invalid asset ID" })
     }
 
-    const { name, ticker, category, unit } = req.body
+    const { name, symbol, category, unit } = req.body
 
     // Validate required fields
-    if (!name || !ticker || !category || !unit) {
-      return res.status(400).json({ message: "Name, ticker, category, and unit are required" })
+    if (!name || !symbol || !category || !unit) {
+      return res.status(400).json({ message: "Name, symbol, category, and unit are required" })
     }
 
     // Check if asset exists
@@ -307,7 +307,7 @@ router.put("/:id", async (req, res) => {
     // Update asset
     const updatedAsset = await AssetListModel.findByIdAndUpdate(
       req.params.id,
-      { name, ticker, category, unit },
+      { name, symbol, category, unit },
       { new: true }
     ).exec()
 

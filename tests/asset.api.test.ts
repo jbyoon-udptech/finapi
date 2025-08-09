@@ -1,8 +1,8 @@
-import request from "supertest"
 import express from "express"
 import mongoose from "mongoose"
-import { AssetListModel } from "../src/db/asset.model"
+import request from "supertest"
 import assetApi from "../src/db/asset.api"
+import { AssetListModel } from "../src/db/asset.model"
 
 const app = express()
 app.use(express.json())
@@ -20,13 +20,13 @@ describe("Asset API", () => {
       // Create test assets
       const asset1 = new AssetListModel({
         name: "Bitcoin",
-        ticker: "BTC",
+        symbol: "BTC",
         category: "crypto",
         unit: "USD",
       })
       const asset2 = new AssetListModel({
         name: "Ethereum",
-        ticker: "ETH",
+        symbol: "ETH",
         category: "crypto",
         unit: "USD",
       })
@@ -46,7 +46,7 @@ describe("Asset API", () => {
     it("should return a specific asset by ID", async () => {
       const asset = new AssetListModel({
         name: "Bitcoin",
-        ticker: "BTC",
+        symbol: "BTC",
         category: "crypto",
         unit: "USD",
       })
@@ -55,7 +55,7 @@ describe("Asset API", () => {
       const response = await request(app).get(`/api/asset/${asset._id}`).expect(200)
 
       expect(response.body.name).toBe("Bitcoin")
-      expect(response.body.ticker).toBe("BTC")
+      expect(response.body.symbol).toBe("BTC")
       expect(response.body.category).toBe("crypto")
     })
 
@@ -77,7 +77,7 @@ describe("Asset API", () => {
     it("should create a new asset", async () => {
       const assetData = {
         name: "Cardano",
-        ticker: "ADA",
+        symbol: "ADA",
         category: "crypto",
         unit: "USD",
       }
@@ -86,7 +86,7 @@ describe("Asset API", () => {
 
       expect(response.body.message).toBe("Asset created successfully")
       expect(response.body.data.name).toBe(assetData.name)
-      expect(response.body.data.ticker).toBe(assetData.ticker)
+      expect(response.body.data.symbol).toBe(assetData.symbol)
       expect(response.body.data.category).toBe(assetData.category)
 
       // Verify it was saved to database
@@ -97,19 +97,19 @@ describe("Asset API", () => {
 
     it("should return 400 when required fields are missing", async () => {
       const incompleteData = {
-        ticker: "BTC",
+        symbol: "BTC",
         // missing name and category
       }
 
       const response = await request(app).post("/api/asset").send(incompleteData).expect(400)
 
-      expect(response.body.message).toBe("Name, ticker, category, and unit are required")
+      expect(response.body.message).toBe("Name, symbol, category, and unit are required")
     })
 
     it("should return 400 for invalid category", async () => {
       const invalidData = {
         name: "Invalid Asset",
-        ticker: "INV",
+        symbol: "INV",
         category: "invalid_category",
         unit: "USD",
       }
@@ -119,26 +119,26 @@ describe("Asset API", () => {
       expect(response.body.message).toContain("Invalid category")
     })
 
-    it("should return 400 when asset ticker already exists", async () => {
+    it("should return 400 when asset symbol already exists", async () => {
       // Create an asset first
       await new AssetListModel({
         name: "Bitcoin",
-        ticker: "BTC",
+        symbol: "BTC",
         category: "crypto",
         unit: "USD",
       }).save()
 
-      // Try to create another with the same ticker
+      // Try to create another with the same symbol
       const duplicateData = {
         name: "Bitcoin Cash",
-        ticker: "BTC",
+        symbol: "BTC",
         category: "crypto",
         unit: "USD",
       }
 
       const response = await request(app).post("/api/asset").send(duplicateData).expect(400)
 
-      expect(response.body.message).toBe("Asset category&ticker already exists")
+      expect(response.body.message).toBe("Asset category&symbol already exists")
     })
   })
 
@@ -146,7 +146,7 @@ describe("Asset API", () => {
     it("should update an existing asset", async () => {
       const asset = new AssetListModel({
         name: "Original Asset",
-        ticker: "ORI",
+        symbol: "ORI",
         category: "crypto",
         unit: "USD",
       })
@@ -154,7 +154,7 @@ describe("Asset API", () => {
 
       const updateData = {
         name: "Updated Asset",
-        ticker: "UPD",
+        symbol: "UPD",
         category: "currency",
         unit: "KRW",
       }
@@ -169,7 +169,7 @@ describe("Asset API", () => {
       // Verify the update in database
       const updatedAsset = await AssetListModel.findById(asset._id)
       expect(updatedAsset?.name).toBe(updateData.name)
-      expect(updatedAsset?.ticker).toBe(updateData.ticker)
+      expect(updatedAsset?.symbol).toBe(updateData.symbol)
       expect(updatedAsset?.category).toBe(updateData.category)
     })
 
@@ -177,7 +177,7 @@ describe("Asset API", () => {
       const nonExistentId = new mongoose.Types.ObjectId()
       const updateData = {
         name: "Updated Asset",
-        ticker: "UPD",
+        symbol: "UPD",
         category: "crypto",
         unit: "USD",
       }
@@ -193,14 +193,14 @@ describe("Asset API", () => {
     it("should return 400 when required fields are missing", async () => {
       const asset = new AssetListModel({
         name: "Test Asset",
-        ticker: "TST",
+        symbol: "TST",
         category: "crypto",
         unit: "USD",
       })
       await asset.save()
 
       const incompleteData = {
-        ticker: "UPD",
+        symbol: "UPD",
         // missing name and category
       }
 
@@ -209,7 +209,7 @@ describe("Asset API", () => {
         .send(incompleteData)
         .expect(400)
 
-      expect(response.body.message).toBe("Name, ticker, category, and unit are required")
+      expect(response.body.message).toBe("Name, symbol, category, and unit are required")
     })
   })
 
@@ -217,7 +217,7 @@ describe("Asset API", () => {
     it("should delete an existing asset", async () => {
       const asset = new AssetListModel({
         name: "Asset to Delete",
-        ticker: "DEL",
+        symbol: "DEL",
         category: "crypto",
         unit: "USD",
       })
