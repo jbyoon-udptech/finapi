@@ -1,6 +1,6 @@
 import { DateTime } from "luxon"
 
-import { loadNupdateAssetPrice } from "./asset.ctrl"
+import { loadNupdateAssetPrice } from "./assetprice"
 
 import mongoose from "mongoose"
 import {

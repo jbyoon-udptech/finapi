@@ -69,3 +69,46 @@ export const loadNupdateAssetPrice = async (
 
   return data
 }
+
+/**
+ * update asset price with date range. start <= date < end
+ */
+export const updateAssetPriceRange = async (
+  assetId: string,
+  startDate: string,
+  endDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _force: boolean = false
+): Promise<AssetPrice[] | null> => {
+  const asset = await AssetListModel.findById(assetId).exec()
+  if (!asset) {
+    console.warn(`Asset with ID ${assetId} not found`)
+    return null
+  }
+
+  const dbData = await AssetPriceModel.find({
+    _assetId: asset._id,
+    date: { $gte: startDate, $lt: endDate },
+  }).exec()
+
+  const fData = await requestFDataRange(asset.category, asset.symbol, startDate, endDate)
+  for (const item of fData) {
+    const existing = dbData.find(d => d.date === item.date)
+    if (existing) {
+      if (existing.value != item.value) {
+        existing.value = item.value
+        existing.unit = item.currency
+        await existing.save()
+      }
+    } else {
+      const newPrice = new AssetPriceModel({
+        _assetId: asset._id,
+        date: item.date,
+        value: item.value,
+        unit: item.currency,
+      })
+      await newPrice.save()
+    }
+  }
+  return dbData.map(d => d.toObject()) as AssetPrice[]
+}

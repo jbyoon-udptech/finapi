@@ -2,7 +2,7 @@ import axios from "axios"
 import { Request, Response, Router } from "express"
 import { DateTime } from "luxon"
 
-export const catergory = "yf"
+export const category = "yf"
 
 const getTickerCurrency = (symbol: string) => {
   let currency = "USD"
@@ -57,6 +57,88 @@ const getTickerCurrency = (symbol: string) => {
   }
 }
 */
+
+/**
+ * get yf stock data
+ * @param symbol
+ * @param statDate start date string formatted by 8 digit format("YYYYMMDD"). start <= date < end
+ * @param endDate end date string formatted by 8 digit format("YYYYMMDD")
+ * @param tz timezone of the symbol, e.g. "Asia/Seoul" or "America/New_York"
+ * @returns value of the stock at the specific date. e.g. { value:100, currency:"USD" }
+ */
+export const requestRawYFApi = async (
+  symbols: string[],
+  startDate: string,
+  endDate: string,
+  tz: string
+) => {
+  const now = DateTime.now().setZone(tz)
+  const start = DateTime.fromFormat(startDate, "yyyyMMdd", { zone: tz })
+  //const end = DateTime.fromFormat(endDate, "yyyyMMdd", { zone: tz })
+  const nDays = Math.ceil(now.diff(start, "days").days) + 1
+  console.log("request raw yf range:", startDate, endDate, "nDays:", nDays)
+  const options = {
+    method: "GET",
+    url: `https://yfapi.net/v8/finance/spark?interval=1d&range=${nDays}d&symbols=${symbols.join(",")}`,
+    params: { modules: "defaultKeyStatistics,assetProfile" },
+    headers: {
+      "x-api-key": process.env.YF_X_API_KEY,
+    },
+  }
+
+  console.log("get stock-yf options:", options)
+  const res = await axios.request(options)
+  console.info("get stock-yf data:", res?.data)
+  const data = res?.data
+  if (!data) {
+    throw { code: `No data for symbols[${symbols}]` }
+  }
+
+  const rs: { [key: string]: Array<[string, number, string]> } = {}
+  for (const symbol of symbols) {
+    const currency = getTickerCurrency(symbol)
+    if (!data[symbol]) {
+      rs[symbol] = []
+      continue
+    }
+    rs[symbol] = []
+    const timestamps = data[symbol].timestamp
+    for (let i = 0; i < timestamps.length; i++) {
+      const date = DateTime.fromSeconds(timestamps[i], { zone: tz }).toFormat("yyyyMMdd")
+      if (date >= startDate && date < endDate) {
+        rs[symbol].push([date, data[symbol].close[i], currency])
+      }
+    }
+  }
+  return rs
+}
+
+/**
+ * get yf data from the API
+ * @param symbol
+ * @param statDate start date string formatted by 8 digit format("YYYYMMDD"). start <= date < end
+ * @param endDate end date string formatted by 8 digit format("YYYYMMDD")
+ * @param tz timezone of the symbol, e.g. "Asia/Seoul" or "America/New_York"
+ * @returns value of the stock at the specific date. e.g. { value:100, currency:"USD" }
+ */
+export const requestYFApiRange = async (
+  symbol: string,
+  startDate: string,
+  endDate: string,
+  tz: string = "Asia/Seoul"
+) => {
+  const data = await requestRawYFApi([symbol], startDate, endDate, tz)
+  if (!data || !data[symbol]) {
+    throw { code: `No data for symbol[${symbol}]` }
+  }
+  return data[symbol].map(([date, value, currency]) => ({
+    category,
+    symbol,
+    date,
+    value,
+    currency,
+  }))
+}
 
 /**
  * get stock data from the API. e.g. getStockData("ETN", "20211010")
@@ -124,7 +206,7 @@ export const requestYFApi = async (symbol: string, date: string, tz: string = "A
       rs[symbol] = data[symbol].close[len - 1]
     }
   }
-  return { catergory, symbol, date, ts: targetTimestamp, value: rs[symbol], currency }
+  return { category, symbol, date, ts: targetTimestamp, value: rs[symbol], currency }
 }
 
 const router = Router()

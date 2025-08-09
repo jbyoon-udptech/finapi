@@ -6,21 +6,18 @@ import { ObjectId } from "mongoose"
 export class AssetList {
   @prop({
     required: true,
-    enum: ["currency", "crypto", "KOSPI", "KOSDAQ", "NASDAQ", "NYSE"],
+    enum: ["yf", "currency", "crypto", "KOSPI", "KOSDAQ", "NASDAQ", "NYSE"],
   })
-  public category!: string // "currency" | "crypto" | "KOSPI"| "KOSDAQ" | "NASDAQ" | "NYSE"
+  public category!: string
 
   @prop({ required: true })
-  public name!: string // "ETH", "한화오션"
+  public name!: string // yf:ETH, KOSPI:한화오션, yf:한화오션, yf:USDKRW
 
   @prop({ required: true })
-  public symbol!: string // "ETH", "042660"
+  public symbol!: string // "ETH", "042660", "042660.KS", "USDKRW=X"
 
   @prop({ required: true })
-  public unit!: string // "USD"
-
-  @prop()
-  public source?: string // "Upbit", "Binance"
+  public unit!: string // "USD", "KRW", "KRW", "JPY"
 }
 
 const AssetListModel = getModelForClass(AssetList, { schemaOptions: { versionKey: false } })
@@ -29,7 +26,7 @@ const AssetListModel = getModelForClass(AssetList, { schemaOptions: { versionKey
 @modelOptions({ schemaOptions: { collection: "assetprice" } })
 export class AssetPrice {
   @prop({ required: true, ref: () => AssetList })
-  public _assetId!: ObjectId // ObjectId of the asset. e.g. "Crypto/ETH", "KOSPI/한화오션"
+  public _assetId!: ObjectId // ObjectId of the asset. e.g. yf:TSLR, Crypto:ETH, "KOSPI:한화오션
 
   @prop({ required: true })
   public date!: string // "2024-10-10"
@@ -38,7 +35,7 @@ export class AssetPrice {
   public value!: number // 2300
 
   @prop()
-  public unit!: string // "USD"
+  public unit!: string // asset unit, e.g., "USD", "KRW", "JPY"
 }
 
 const AssetPriceModel = getModelForClass(AssetPrice)
